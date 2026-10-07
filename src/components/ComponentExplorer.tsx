@@ -266,6 +266,105 @@ export default function ComponentExplorer() {
           ))}
         </div>
       </div>
+
+      {/* Harness Lifecycle State Machine */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Cpu size={18} className="text-orange-400" />
+          Harness Lifecycle State Machine
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            {[
+              { state: 'stopped', color: 'bg-gray-500/10 border-gray-500/20 text-gray-400', icon: '⏹' },
+              { state: 'running', color: 'bg-green-500/10 border-green-500/20 text-green-400', icon: '▶' },
+              { state: 'error', color: 'bg-red-500/10 border-red-500/20 text-red-400', icon: '⚠' },
+            ].map((item, i) => (
+              <div key={item.state} className="flex items-center gap-3">
+                <motion.div
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  className={`px-4 py-3 rounded-lg border ${item.color} text-center min-w-[100px]`}
+                >
+                  <div className="text-lg mb-1">{item.icon}</div>
+                  <div className="text-xs font-medium">{item.state}</div>
+                </motion.div>
+                {i < 2 && (
+                  <div className="flex flex-col items-center gap-0.5">
+                    <ArrowRight size={14} className="text-gray-600" />
+                    <span className="text-[9px] text-gray-600">start/stop</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+            <div className="p-2 rounded-lg bg-gray-800/30 border border-gray-800">
+              <div className="text-[10px] text-gray-500 mb-1">Transitions</div>
+              <div className="text-[11px] text-gray-300">stopped → running</div>
+              <div className="text-[11px] text-gray-300">running → stopped</div>
+            </div>
+            <div className="p-2 rounded-lg bg-gray-800/30 border border-gray-800">
+              <div className="text-[10px] text-gray-500 mb-1">Error Recovery</div>
+              <div className="text-[11px] text-gray-300">error → stopped</div>
+              <div className="text-[11px] text-gray-300">error → running</div>
+            </div>
+            <div className="p-2 rounded-lg bg-gray-800/30 border border-gray-800">
+              <div className="text-[10px] text-gray-500 mb-1">Methods</div>
+              <code className="text-[10px] text-orange-300 font-mono">start()</code>
+              <br />
+              <code className="text-[10px] text-orange-300 font-mono">stop()</code>
+              <br />
+              <code className="text-[10px] text-orange-300 font-mono">status()</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Provider Type Registry */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Layers size={18} className="text-purple-400" />
+          Provider Type Registry
+        </h2>
+        <div className="grid md:grid-cols-2 gap-3">
+          {[
+            { type: 'deepseek-api', label: 'DeepSeek API', desc: 'Direct API key authentication', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+            { type: 'deepseek-account', label: 'DeepSeek Account', desc: 'Web session authentication', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
+            { type: 'custom-openai', label: 'Custom OpenAI Compatible', desc: 'Third-party OpenAI-compatible APIs', color: 'text-green-400 bg-green-500/10 border-green-500/20' },
+            { type: 'local-model', label: 'Local Model', desc: 'Local LLM (Ollama, llama.cpp, etc.)', color: 'text-orange-400 bg-orange-500/10 border-orange-500/20' },
+          ].map((provider, i) => (
+            <motion.div
+              key={provider.type}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.08 }}
+              className={`p-4 rounded-xl border ${provider.color}`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium">{provider.label}</h3>
+                <code className="text-[10px] text-gray-500 font-mono">{provider.type}</code>
+              </div>
+              <p className="text-xs text-gray-400">{provider.desc}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-black/20 text-gray-400 border border-white/5">
+                  authenticate()
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-black/20 text-gray-400 border border-white/5">
+                  listModels()
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-black/20 text-gray-400 border border-white/5">
+                  chat()
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-black/20 text-gray-400 border border-white/5">
+                  stream()
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

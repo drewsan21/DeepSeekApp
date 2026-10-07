@@ -339,6 +339,136 @@ export default function SecurityOverview() {
           </p>
         </div>
       </div>
+
+      {/* Secret Store Key Schema */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Key size={18} className="text-amber-400" />
+          Secret Store Key Schema
+        </h3>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <div className="px-4 py-2.5 bg-gray-800/50 border-b border-gray-800 flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-300">SERVICE_NAME:</span>
+            <code className="text-xs text-amber-300 font-mono">'DeepSeek Desktop'</code>
+          </div>
+          <div className="divide-y divide-gray-800/50">
+            {[
+              { key: 'active-account-token', desc: 'Current authenticated session token', category: 'Account' },
+              { key: 'deepseek/account/user-123/credential', desc: 'Stored account credential', category: 'Account' },
+              { key: 'deepseek/provider/deepseek-api/credential', desc: 'API key for DeepSeek API provider', category: 'Provider' },
+              { key: 'deepseek/provider/custom-openai/credential', desc: 'API key for custom OpenAI provider', category: 'Provider' },
+              { key: 'deepseek/session/session-abc123', desc: 'Temporary session data', category: 'Session' },
+            ].map((item, i) => (
+              <motion.div
+                key={item.key}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800/20"
+              >
+                <Lock size={12} className="text-amber-400 flex-shrink-0" />
+                <code className="text-[11px] text-amber-300 font-mono flex-1">{item.key}</code>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-500 border border-gray-700">
+                  {item.category}
+                </span>
+                <span className="text-[10px] text-gray-500 hidden md:block">{item.desc}</span>
+              </motion.div>
+            ))}
+          </div>
+          <div className="px-4 py-3 bg-red-500/5 border-t border-red-500/20">
+            <p className="text-[11px] text-red-300">
+              <AlertTriangle size={12} className="inline mr-1" />
+              <span className="font-medium">Never store:</span> passwords, API keys, cookies, or tokens in localStorage, IndexedDB, SQLite, or plaintext files.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Electron Window Security Configuration */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Monitor size={18} className="text-cyan-400" />
+          Electron Window Security Configuration
+        </h3>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-xs font-medium text-gray-400 mb-3 flex items-center gap-1.5">
+                <ShieldCheck size={12} className="text-green-400" />
+                BrowserWindow Options
+              </h4>
+              <div className="space-y-2">
+                {[
+                  { prop: 'nodeIntegration', value: 'false', critical: true },
+                  { prop: 'contextIsolation', value: 'true', critical: true },
+                  { prop: 'sandbox', value: 'true', critical: true },
+                  { prop: 'webSecurity', value: 'true', critical: true },
+                  { prop: 'width', value: '1200', critical: false },
+                  { prop: 'height', value: '800', critical: false },
+                ].map((item, i) => (
+                  <motion.div
+                    key={item.prop}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30"
+                  >
+                    {item.critical ? (
+                      <ShieldCheck size={12} className="text-green-400" />
+                    ) : (
+                      <Monitor size={12} className="text-gray-500" />
+                    )}
+                    <code className="text-[11px] text-cyan-300 font-mono flex-1">{item.prop}</code>
+                    <code className={`text-[11px] font-mono ${
+                      item.value === 'false' ? 'text-red-400' :
+                      item.value === 'true' ? 'text-green-400' :
+                      'text-gray-400'
+                    }`}>
+                      {item.value}
+                    </code>
+                    {item.critical && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">
+                        CRITICAL
+                      </span>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-xs font-medium text-gray-400 mb-3 flex items-center gap-1.5">
+                <ShieldAlert size={12} className="text-amber-400" />
+                Navigation & Popup Handlers
+              </h4>
+              <div className="space-y-2">
+                {[
+                  { handler: 'setWindowOpenHandler()', desc: 'Block unexpected popups' },
+                  { handler: 'will-navigate', desc: 'Restrict auth window navigation' },
+                  { handler: 'did-navigate', desc: 'Validate navigation targets' },
+                  { handler: 'webRequest', desc: 'Intercept and validate requests' },
+                ].map((item, i) => (
+                  <motion.div
+                    key={item.handler}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    className="p-2 rounded-lg bg-gray-800/30"
+                  >
+                    <code className="text-[11px] text-amber-300 font-mono">{item.handler}</code>
+                    <p className="text-[10px] text-gray-500 mt-0.5">{item.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+              <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+                <p className="text-[11px] text-gray-400">
+                  <span className="text-cyan-400 font-medium">Preload:</span>{' '}
+                  <code className="text-gray-300">path.join(__dirname, 'preload.js')</code>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
