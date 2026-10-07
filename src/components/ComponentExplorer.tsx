@@ -15,7 +15,8 @@ import {
   Database,
   Cpu,
   Monitor,
-  Network
+  Network,
+  Zap
 } from 'lucide-react'
 
 interface ComponentDef {
@@ -363,6 +364,113 @@ export default function ComponentExplorer() {
               </div>
             </motion.div>
           ))}
+        </div>
+      </div>
+
+      {/* Process Communication Pattern */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Terminal size={18} className="text-orange-400" />
+          Harness Process Communication
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Spawn Configuration</h3>
+              <div className="space-y-1.5">
+                {[
+                  { prop: 'command', value: 'deepseek-harness' },
+                  { prop: 'args', value: '--stdio --no-color' },
+                  { prop: 'env.NODE_ENV', value: 'production' },
+                ].map(item => (
+                  <div key={item.prop} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-gray-400 font-mono flex-1">{item.prop}</code>
+                    <code className="text-[11px] text-orange-300 font-mono">{item.value}</code>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Stream Handling</h3>
+              <div className="space-y-1.5">
+                {[
+                  { stream: 'stdout', handler: 'JSON.parse() line-by-line', color: 'text-green-400' },
+                  { stream: 'stderr', handler: 'Console error logging', color: 'text-red-400' },
+                  { stream: 'stdin', handler: 'JSON.stringify() requests', color: 'text-blue-400' },
+                ].map(item => (
+                  <div key={item.stream} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className={`text-[11px] font-mono ${item.color}`}>{item.stream}</code>
+                    <span className="text-[10px] text-gray-500">{item.handler}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <p className="text-[11px] text-gray-400">
+              <span className="text-orange-400 font-medium">Buffer handling:</span>{' '}
+              <code className="text-gray-300">lines.pop()</code> keeps incomplete lines in buffer for next chunk
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* AsyncIterable Streaming Pattern */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Zap size={18} className="text-amber-400" />
+          AsyncIterable Streaming Pattern
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="space-y-3">
+            <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Queue-Based Iterator</h3>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="p-2 rounded bg-blue-500/10 border border-blue-500/20">
+                  <div className="text-[10px] text-blue-400 mb-1">Queue</div>
+                  <code className="text-[11px] text-blue-300 font-mono">HarnessEvent[]</code>
+                </div>
+                <div className="p-2 rounded bg-purple-500/10 border border-purple-500/20">
+                  <div className="text-[10px] text-purple-400 mb-1">Resolve</div>
+                  <code className="text-[11px] text-purple-300 font-mono">Promise&lt;T&gt;</code>
+                </div>
+                <div className="p-2 rounded bg-green-500/10 border border-green-500/20">
+                  <div className="text-[10px] text-green-400 mb-1">Done</div>
+                  <code className="text-[11px] text-green-300 font-mono">boolean</code>
+                </div>
+              </div>
+            </div>
+            <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Event Flow</h3>
+              <div className="flex items-center gap-2 text-[11px]">
+                <span className="px-2 py-1 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                  emit('event')
+                </span>
+                <ArrowRight size={12} className="text-gray-600" />
+                <span className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  onEvent()
+                </span>
+                <ArrowRight size={12} className="text-gray-600" />
+                <span className="px-2 py-1 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                  resolve() or queue.push()
+                </span>
+              </div>
+            </div>
+            <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Termination Conditions</h3>
+              <div className="space-y-1">
+                <div className="text-[11px] text-gray-400">
+                  <span className="text-green-400">✓</span> event.type === 'completed'
+                </div>
+                <div className="text-[11px] text-gray-400">
+                  <span className="text-red-400">✓</span> event.type === 'error'
+                </div>
+                <div className="text-[11px] text-gray-400">
+                  <span className="text-amber-400">✓</span> iterator.return() called
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
