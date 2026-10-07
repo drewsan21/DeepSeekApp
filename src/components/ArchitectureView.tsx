@@ -896,6 +896,108 @@ frame-src 'none';`}
           </div>
         </div>
       </div>
+
+      {/* Tab Strip UI */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Layers size={18} className="text-blue-400" />
+          Tab Strip UI Component
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="mb-4">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Tab Strip Layout</h3>
+            <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-700">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex gap-1">
+                  <div className="w-3 h-3 rounded-full bg-red-500/50" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                </div>
+                <div className="flex-1 h-6 bg-gray-900/50 rounded border border-gray-700 flex items-center px-2">
+                  <span className="text-[10px] text-gray-500">https://example.com</span>
+                </div>
+              </div>
+              <div className="flex gap-1">
+                <div className="flex-1 max-w-[200px] px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-t text-[11px] text-blue-300 truncate">
+                  Example Domain
+                </div>
+                <div className="flex-1 max-w-[200px] px-3 py-1.5 bg-gray-800/50 border border-gray-700 rounded-t text-[11px] text-gray-400 truncate">
+                  DeepSeek Chat
+                </div>
+                <div className="flex-1 max-w-[200px] px-3 py-1.5 bg-gray-800/50 border border-gray-700 rounded-t text-[11px] text-gray-400 truncate">
+                  GitHub
+                </div>
+                <button className="px-2 py-1.5 bg-gray-800/30 border border-gray-700 rounded text-[11px] text-gray-500 hover:bg-gray-700/30">
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Tab Component Props</h3>
+              <div className="space-y-1">
+                {[
+                  { prop: 'tab', type: 'BrowserTabInfo', desc: 'Tab data' },
+                  { prop: 'isActive', type: 'boolean', desc: 'Active state' },
+                  { prop: 'onActivate', type: '() => void', desc: 'Click handler' },
+                  { prop: 'onClose', type: '() => void', desc: 'Close handler' },
+                ].map(item => (
+                  <div key={item.prop} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[10px] text-blue-300 font-mono">{item.prop}</code>
+                    <code className="text-[10px] text-gray-500 font-mono">{item.type}</code>
+                    <span className="text-[10px] text-gray-600 ml-auto">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Tab Events Flow</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-[11px]">
+                  <span className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    tab-created
+                  </span>
+                  <ArrowRight size={12} className="text-gray-600" />
+                  <span className="px-2 py-1 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    TabStrip
+                  </span>
+                  <ArrowRight size={12} className="text-gray-600" />
+                  <span className="px-2 py-1 rounded bg-green-500/10 text-green-400 border border-green-500/20">
+                    Render
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px]">
+                  <span className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    tab-updated
+                  </span>
+                  <ArrowRight size={12} className="text-gray-600" />
+                  <span className="px-2 py-1 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    TabStrip
+                  </span>
+                  <ArrowRight size={12} className="text-gray-600" />
+                  <span className="px-2 py-1 rounded bg-green-500/10 text-green-400 border border-green-500/20">
+                    Update
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px]">
+                  <span className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    tab-closed
+                  </span>
+                  <ArrowRight size={12} className="text-gray-600" />
+                  <span className="px-2 py-1 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    TabStrip
+                  </span>
+                  <ArrowRight size={12} className="text-gray-600" />
+                  <span className="px-2 py-1 rounded bg-green-500/10 text-green-400 border border-green-500/20">
+                    Remove
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

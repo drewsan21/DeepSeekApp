@@ -16,7 +16,8 @@ import {
   Cpu,
   Monitor,
   Network,
-  Zap
+  Zap,
+  Menu
 } from 'lucide-react'
 
 interface ComponentDef {
@@ -635,6 +636,139 @@ export default function ComponentExplorer() {
                   Returns the currently active tab ID for page context extraction
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Management System */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Layers size={18} className="text-blue-400" />
+          Tab Management System
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">BrowserTabInfo Interface</h3>
+              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <code className="text-[10px] text-blue-300 font-mono block whitespace-pre-wrap">
+{`interface BrowserTabInfo {
+  id: string;
+  url: string;
+  title: string;
+  loading?: boolean;
+}`}
+                </code>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Tab Operations</h3>
+              <div className="space-y-1.5">
+                {[
+                  { method: 'createTab(url)', desc: 'Create new tab', returns: 'tabId' },
+                  { method: 'listTabs()', desc: 'Get all tabs', returns: 'BrowserTabInfo[]' },
+                  { method: 'activateTab(id)', desc: 'Switch to tab', returns: 'void' },
+                  { method: 'closeTab(id)', desc: 'Close and cleanup', returns: 'void' },
+                ].map(item => (
+                  <div key={item.method} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-blue-300 font-mono flex-1">{item.method}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Tab Events (EventEmitter)</h3>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { event: 'tab-created', desc: 'New tab created' },
+                { event: 'tab-updated', desc: 'Tab info changed' },
+                { event: 'tab-closed', desc: 'Tab removed' },
+              ].map(item => (
+                <div key={item.event} className="p-2 rounded bg-gray-900/50 border border-gray-700">
+                  <code className="text-[10px] text-blue-300 font-mono">{item.event}</code>
+                  <div className="text-[9px] text-gray-500 mt-0.5">{item.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Context Menu Integration */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Menu size={18} className="text-purple-400" />
+          Context Menu Integration
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Context Actions</h3>
+              <div className="space-y-1.5">
+                {[
+                  { action: 'ask', label: 'Ask DeepSeek about selection', icon: '💬', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+                  { action: 'summarize', label: 'Summarize selection', icon: '📝', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
+                  { action: 'explain', label: 'Explain selection', icon: '🔍', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
+                  { action: 'rewrite', label: 'Rewrite selection', icon: '✏️', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+                  { action: 'translate', label: 'Translate selection', icon: '🌐', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+                ].map(item => (
+                  <div key={item.action} className={`flex items-center gap-2 p-2 rounded-lg border ${item.color}`}>
+                    <span className="text-sm">{item.icon}</span>
+                    <code className="text-[11px] font-mono">{item.action}</code>
+                    <span className="text-[10px] text-gray-400 ml-auto">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Context Action Payload</h3>
+              <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20">
+                <code className="text-[10px] text-purple-300 font-mono block whitespace-pre-wrap">
+{`interface BrowserContextActionPayload {
+  action: BrowserContextAction;
+  tabId: string;
+  url: string;
+  title: string;
+  selectionText?: string;
+}`}
+                </code>
+              </div>
+              <div className="mt-3 p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">Trigger</div>
+                <div className="text-[11px] text-gray-400">
+                  Right-click on selected text → <code className="text-purple-300">context-menu</code> event
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Menu Structure</h3>
+            <div className="flex flex-col gap-1">
+              {[
+                { label: 'Ask DeepSeek about selection', enabled: true },
+                { label: 'Summarize selection', enabled: true },
+                { label: 'Explain selection', enabled: true },
+                { label: 'Rewrite selection', enabled: true },
+                { label: 'Translate selection', enabled: true },
+                { label: '—', separator: true },
+                { label: 'Open DeepSeek panel', enabled: true },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className={`px-3 py-1.5 text-xs rounded ${
+                    item.separator
+                      ? 'border-t border-gray-700 my-1'
+                      : item.enabled
+                      ? 'hover:bg-purple-500/10 cursor-pointer text-gray-300'
+                      : 'text-gray-600 cursor-not-allowed'
+                  }`}
+                >
+                  {item.label}
+                </div>
+              ))}
             </div>
           </div>
         </div>
