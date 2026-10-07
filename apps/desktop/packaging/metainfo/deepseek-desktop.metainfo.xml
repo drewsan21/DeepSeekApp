@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.deepseek.desktop</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>DeepSeek Desktop</name>
+  <summary>DeepSeek Harness and browser workspace</summary>
+  <description>
+    <p>
+      DeepSeek Desktop integrates Harness, account authentication, provider selection,
+      and browser tooling into one Electron application.
+    </p>
+  </description>
+  <provides>
+    <binary>deepseek-desktop</binary>
+  </provides>
+</component>
