@@ -1,13 +1,20 @@
 {
   "name": "@deepseek/desktop",
   "version": "0.1.0",
+  "description": "DeepSeek Desktop - Harness, Auth, and Browser in one app",
   "main": "dist/electron/main.js",
+  "author": "DeepSeek",
+  "license": "MIT",
   "scripts": {
     "dev": "electron .",
+    "dev:renderer": "cd renderer && pnpm dev",
     "build:electron": "node scripts/build-main.mjs",
-    "build:renderer": "pnpm -F @deepseek/renderer build",
+    "build:renderer": "cd renderer && pnpm build",
     "build": "pnpm build:renderer && pnpm build:electron",
-    "dist:deb": "pnpm build && electron-builder --config electron-builder.yml --linux deb --x64 --arm64"
+    "dist:linux": "pnpm build && electron-builder --config electron-builder.yml --linux",
+    "dist:win": "pnpm build && electron-builder --config electron-builder.yml --win",
+    "dist:mac": "pnpm build && electron-builder --config electron-builder.yml --mac",
+    "dist:all": "pnpm build && electron-builder --config electron-builder.yml -mwl"
   },
   "dependencies": {
     "@deepseek/shared": "workspace:*",

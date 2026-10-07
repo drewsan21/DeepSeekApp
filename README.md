@@ -1,6 +1,30 @@
-# DeepSeek Desktop — Implementation Dashboard
+# DeepSeek Desktop
 
-An interactive web-based project dashboard that visualizes the complete implementation plan for the **DeepSeek Desktop** application — a single Debian Electron/Chromium application combining the DeepSeek Harness, account authentication, provider integration, and browser tooling with isolated credentials and sessions.
+> A cross-platform Electron/Chromium desktop application combining the DeepSeek Harness, account authentication, provider integration, and browser tooling — with isolated credentials and browser sessions.
+>
+> **Platforms:** Windows (.exe) • Linux (.deb) • macOS (.dmg)
+
+This repository contains:
+1. **The Electron Application** — A complete cross-platform desktop app (`apps/desktop/`, `packages/`)
+2. **Implementation Dashboard** — An interactive web-based visualization of the project plan (`src/`)
+
+## 📦 What's Included
+
+### Electron Application (Cross-Platform)
+- ✅ Monorepo with 5 core packages
+- ✅ Secure IPC bridge with 27 channels
+- ✅ OS keyring integration (Windows Credential Manager / Linux Secret Service)
+- ✅ Isolated browser sessions
+- ✅ Permission-based action approval
+- ✅ Windows .exe installer (NSIS)
+- ✅ Linux .deb package
+- ✅ React + Vite renderer with dark theme
+
+### Implementation Dashboard (Web)
+- ✅ Interactive project roadmap with progress tracking
+- ✅ Architecture diagrams and component explorer
+- ✅ Feature matrix and security overview
+- ✅ Real-time visualization of all 72+ features
 
 ## 🚀 Quick Start
 

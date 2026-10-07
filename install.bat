@@ -1,123 +1,118 @@
 @echo off
-setlocal EnableDelayedExpansion
-REM ============================================================================
-REM DeepSeek Desktop — Environment Installer (Windows)
-REM ============================================================================
-REM This script installs all project dependencies into the local project folder.
-REM It does NOT require Administrator access and does not install global packages.
-REM
-REM Prerequisites:
-REM   - Node.js >= 18  (https://nodejs.org)
-REM   - npm >= 9       (ships with Node.js)
-REM
-REM Usage:
-REM   Double-click install.bat  OR  run from Command Prompt
-REM ============================================================================
+setlocal enabledelayedexpansion
 
-title DeepSeek Desktop — Installer
+REM ============================================================
+REM DeepSeek Desktop - Windows Installation Script
+REM Generates .exe installer for Windows
+REM ============================================================
 
 echo.
-echo ================================================================
-echo    DeepSeek Desktop — Environment Installer (Windows)
-echo ================================================================
+echo ============================================================
+echo   DeepSeek Desktop - Windows Installer Builder
+echo ============================================================
 echo.
 
-REM ---------- Change to script directory ----------
-cd /d "%~dp0"
-set "PROJECT_DIR=%CD%"
-
-REM ---------- Check Node.js ----------
-echo [1/4] Checking Node.js...
-where node >nul 2>&1
-if %ERRORLEVEL% neq 0 (
+REM Check if Node.js is installed
+where node >nul 2>nul
+if %errorlevel% neq 0 (
+    echo [ERROR] Node.js is not installed or not in PATH
     echo.
-    echo [ERROR] Node.js is not installed or not in PATH.
-    echo.
-    echo Install Node.js (>= 18^) from one of these:
-    echo   - Official installer : https://nodejs.org/
-    echo   - wing               : winget install OpenJS.NodeJS.LTS
-    echo   - Chocolatey         : choco install nodejs-lts
-    echo   - Scoop              : scoop install nodejs-lts
+    echo Please install Node.js from https://nodejs.org/
     echo.
     pause
     exit /b 1
 )
 
-for /f "tokens=1 delims=v" %%a in ('node -v') do set "NODE_RAW=%%a"
-for /f "tokens=1 delims=v" %%a in ('node -v') do set "NODE_VERSION=%%a"
-for /f "tokens=1 delims=." %%a in ('node -v') do set "NODE_MAJOR=%%a"
+echo [OK] Node.js found
 
-REM Strip leading 'v' from version
-set NODE_VERSION=!NODE_VERSION:v=!
-set NODE_MAJOR=!NODE_MAJOR:v=!
+REM Check if pnpm is installed
+where pnpm >nul 2>nul
+if %errorlevel% neq 0 (
+    echo [INFO] pnpm not found, installing globally...
+    npm install -g pnpm
+    if %errorlevel% neq 0 (
+        echo [ERROR] Failed to install pnpm
+        pause
+        exit /b 1
+    )
+)
 
-echo   [OK] Node.js %NODE_VERSION%
+echo [OK] pnpm found
 
-if !NODE_MAJOR! LSS 18 (
-    echo.
-    echo [ERROR] Node.js 18 or newer is required ^(found %NODE_VERSION%^).
+REM Install dependencies
+echo.
+echo [1/5] Installing dependencies...
+pnpm install
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to install dependencies
     pause
     exit /b 1
 )
 
-REM ---------- Check npm ----------
-echo [2/4] Checking npm...
-where npm >nul 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo.
-    echo [ERROR] npm is not installed.
-    pause
-    exit /b 1
-)
-for /f "tokens=*" %%v in ('npm -v') do set "NPM_VERSION=%%v"
-echo   [OK] npm %NPM_VERSION%
+echo [OK] Dependencies installed
 
-REM ---------- Install dependencies ----------
-echo [3/4] Installing dependencies into .\node_modules ...
+REM Build all packages
 echo.
-
-REM Use a local cache inside the project to keep everything self-contained
-set "npm_config_cache=%PROJECT_DIR%\.npm-cache"
-if not exist "%PROJECT_DIR%\.npm-cache" mkdir "%PROJECT_DIR%\.npm-cache"
-
-call npm install --no-audit --no-fund --loglevel=error
-if %ERRORLEVEL% neq 0 (
-    echo.
-    echo [ERROR] npm install failed. See errors above.
-    echo   Try: rmdir /s /q node_modules .npm-cache  then re-run install.bat
+echo [2/5] Building all packages...
+pnpm -r build
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to build packages
     pause
     exit /b 1
 )
 
-echo.
-echo   [OK] All dependencies installed successfully.
+echo [OK] Packages built
 
-REM ---------- Summary ----------
-echo [4/4] Verifying installation...
-if not exist "node_modules" (
-    echo.
-    echo [ERROR] node_modules directory not found after install.
+REM Build Electron main process
+echo.
+echo [3/5] Building Electron main process...
+cd apps\desktop
+node scripts\build-main.mjs
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to build Electron main process
     pause
     exit /b 1
 )
 
-echo   [OK] node_modules directory present.
+echo [OK] Electron main process built
+
+REM Build renderer
+echo.
+echo [4/5] Building renderer...
+pnpm --filter @deepseek/renderer build
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to build renderer
+    pause
+    exit /b 1
+)
+
+echo [OK] Renderer built
+
+REM Build Windows installer
+echo.
+echo [5/5] Building Windows installer (.exe)...
+pnpm exec electron-builder --config electron-builder.yml --win --x64
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to build Windows installer
+    pause
+    exit /b 1
+)
+
+echo [OK] Windows installer built
 
 echo.
-echo ================================================================
-echo                     Installation complete!
-echo ================================================================
+echo ============================================================
+echo   Build Complete!
+echo ============================================================
 echo.
-echo Project folder : %PROJECT_DIR%
-echo Node modules   : %PROJECT_DIR%\node_modules
-echo npm cache      : %PROJECT_DIR%\.npm-cache
+echo Output files are in: apps\desktop\release\
 echo.
-echo Next steps:
-echo   1. Start the app   : start.bat
-echo   2. Open in browser : http://localhost:3000
-echo   3. Build for prod  : npm run build
+echo To install:
+echo   1. Open the release folder
+echo   2. Run "DeepSeek Desktop Setup *.exe"
+echo   3. Follow the installation wizard
 echo.
-echo Tip: All dependencies are contained in this project folder.
-echo      You can delete node_modules and re-run install.bat anytime.
+echo Or use the portable version:
+echo   deepseek-desktop-portable-*.exe
 echo.
 pause
