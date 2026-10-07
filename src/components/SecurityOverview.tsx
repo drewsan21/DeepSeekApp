@@ -17,7 +17,8 @@ import {
   ChevronRight,
   AlertOctagon,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  ArrowRight
 } from 'lucide-react'
 
 interface SecurityRule {
@@ -466,6 +467,162 @@ export default function SecurityOverview() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Page Context Extraction Pipeline */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <FileText size={18} className="text-blue-400" />
+          Page Context Extraction Pipeline
+        </h3>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="space-y-3">
+            {[
+              { step: 1, action: 'executeJavaScript()', detail: 'Run in sandboxed webContents', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+              { step: 2, action: 'window.getSelection()', detail: 'Extract selected text', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
+              { step: 3, action: 'document.body.innerText', detail: 'Extract readable text', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
+              { step: 4, action: 'text.substring(0, 8000)', detail: 'Hard limit: 8000 characters', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+              { step: 5, action: 'sanitizePageText()', detail: 'Strip hidden characters', color: 'text-red-400 bg-red-500/10 border-red-500/20' },
+              { step: 6, action: 'Return PageContext', detail: 'Safe data to Harness', color: 'text-green-400 bg-green-500/10 border-green-500/20' },
+            ].map((item, i) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="flex items-center gap-3 p-2 rounded-lg bg-gray-800/30"
+              >
+                <div className="w-6 h-6 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-400">
+                  {item.step}
+                </div>
+                <div className="flex-1">
+                  <span className={`text-[11px] px-2 py-0.5 rounded border font-medium ${item.color}`}>
+                    {item.action}
+                  </span>
+                  <code className="text-[10px] text-gray-500 font-mono ml-2">{item.detail}</code>
+                </div>
+                {i < 5 && <ArrowRight size={12} className="text-gray-700" />}
+              </motion.div>
+            ))}
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <p className="text-[11px] text-gray-400">
+              <span className="text-blue-400 font-medium">PageContext structure:</span>{' '}
+              <code className="text-gray-300">{'{ url, title, selectedText, readableText }'}</code>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Text Sanitization */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <ShieldAlert size={18} className="text-red-400" />
+          Text Sanitization Regex
+        </h3>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 mb-4">
+            <code className="text-xs text-red-300 font-mono block">
+              /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g
+            </code>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-xs font-medium text-gray-400 mb-2">Stripped Characters</h4>
+              <div className="space-y-1">
+                {[
+                  { range: '\\x00-\\x08', desc: 'Control characters (NUL, SOH, etc.)' },
+                  { range: '\\x0B', desc: 'Vertical tab' },
+                  { range: '\\x0C', desc: 'Form feed' },
+                  { range: '\\x0E-\\x1F', desc: 'More control characters' },
+                  { range: '\\x7F', desc: 'DEL character' },
+                ].map(item => (
+                  <div key={item.range} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-red-300 font-mono">{item.range}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-xs font-medium text-gray-400 mb-2">Preserved Characters</h4>
+              <div className="space-y-1">
+                {[
+                  { range: '\\x09', desc: 'Tab (preserved)' },
+                  { range: '\\x0A', desc: 'Newline (preserved)' },
+                  { range: '\\x0D', desc: 'Carriage return (preserved)' },
+                  { range: '\\x20-\\x7E', desc: 'Printable ASCII (preserved)' },
+                ].map(item => (
+                  <div key={item.range} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-green-300 font-mono">{item.range}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <p className="text-[11px] text-gray-400">
+              <span className="text-red-400 font-medium">Purpose:</span>{' '}
+              Prevents hidden character injection and ensures clean text for the AI model
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Browser Permission Handler */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Shield size={18} className="text-emerald-400" />
+          Browser Permission Request Handler
+        </h3>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-xs font-medium text-gray-400 mb-2 flex items-center gap-1.5">
+                <CheckCircle size={12} className="text-green-400" />
+                Allowed Permissions
+              </h4>
+              <div className="space-y-1.5">
+                {[
+                  'clipboard-read',
+                  'clipboard-sanitized-write',
+                ].map(perm => (
+                  <div key={perm} className="flex items-center gap-2 p-2 rounded-lg bg-green-500/5 border border-green-500/20">
+                    <CheckCircle size={12} className="text-green-400" />
+                    <code className="text-[11px] text-green-300 font-mono">{perm}</code>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-xs font-medium text-gray-400 mb-2 flex items-center gap-1.5">
+                <XCircle size={12} className="text-red-400" />
+                Denied Permissions
+              </h4>
+              <div className="space-y-1.5">
+                {[
+                  'geolocation',
+                  'notifications',
+                  'camera',
+                  'microphone',
+                  'midi',
+                ].map(perm => (
+                  <div key={perm} className="flex items-center gap-2 p-2 rounded-lg bg-red-500/5 border border-red-500/20">
+                    <XCircle size={12} className="text-red-400" />
+                    <code className="text-[11px] text-red-300 font-mono">{perm}</code>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <p className="text-[11px] text-gray-400">
+              <span className="text-emerald-400 font-medium">Handler:</span>{' '}
+              <code className="text-gray-300">setPermissionRequestHandler()</code> — Called when webContents requests permission
+            </p>
           </div>
         </div>
       </div>
