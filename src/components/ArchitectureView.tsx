@@ -16,7 +16,8 @@ import {
   FolderOpen,
   Network,
   HardDrive,
-  Package
+  Package,
+  Zap
 } from 'lucide-react'
 
 type LayerKey = 'main' | 'renderer' | 'integration' | 'harness' | 'linux'
@@ -60,18 +61,19 @@ const layers: { key: LayerKey; label: string; color: string; borderColor: string
 ]
 
 const ipcApis = [
-  { path: 'window.deepseek.auth.login()', desc: 'Begin authentication flow', safe: true },
-  { path: 'window.deepseek.auth.logout()', desc: 'End authenticated session', safe: true },
-  { path: 'window.deepseek.auth.status()', desc: 'Get auth status', safe: true },
-  { path: 'window.deepseek.providers.list()', desc: 'List available providers', safe: true },
-  { path: 'window.deepseek.providers.select()', desc: 'Select active provider', safe: true },
-  { path: 'window.deepseek.harness.start()', desc: 'Start harness process', safe: true },
-  { path: 'window.deepseek.harness.stop()', desc: 'Stop harness process', safe: true },
-  { path: 'window.deepseek.harness.run()', desc: 'Execute harness task', safe: true },
-  { path: 'window.deepseek.browser.open()', desc: 'Open browser tab', safe: true },
-  { path: 'window.deepseek.browser.close()', desc: 'Close browser tab', safe: true },
-  { path: 'window.deepseek.browser.getPageContext()', desc: 'Extract page context', safe: true },
-  { path: 'window.deepseek.permissions.request()', desc: 'Request permission', safe: true },
+  { path: 'window.deepseek.auth.login()', desc: 'Begin authentication flow', safe: true, channel: 'auth:login', pattern: 'invoke' },
+  { path: 'window.deepseek.auth.logout()', desc: 'End authenticated session', safe: true, channel: 'auth:logout', pattern: 'invoke' },
+  { path: 'window.deepseek.auth.status()', desc: 'Get auth status', safe: true, channel: 'auth:status', pattern: 'invoke' },
+  { path: 'window.deepseek.providers.list()', desc: 'List available providers', safe: true, channel: 'providers:list', pattern: 'invoke' },
+  { path: 'window.deepseek.providers.select()', desc: 'Select active provider', safe: true, channel: 'providers:select', pattern: 'invoke' },
+  { path: 'window.deepseek.harness.start()', desc: 'Start harness process', safe: true, channel: 'harness:start', pattern: 'invoke' },
+  { path: 'window.deepseek.harness.stop()', desc: 'Stop harness process', safe: true, channel: 'harness:stop', pattern: 'invoke' },
+  { path: 'window.deepseek.harness.run()', desc: 'Execute harness task', safe: true, channel: 'harness:run', pattern: 'invoke' },
+  { path: 'window.deepseek.harness.onStream()', desc: 'Listen to harness events', safe: true, channel: 'harness:stream', pattern: 'listen' },
+  { path: 'window.deepseek.browser.open()', desc: 'Open browser tab', safe: true, channel: 'browser:open', pattern: 'invoke' },
+  { path: 'window.deepseek.browser.close()', desc: 'Close browser tab', safe: true, channel: 'browser:close', pattern: 'invoke' },
+  { path: 'window.deepseek.browser.getPageContext()', desc: 'Extract page context', safe: true, channel: 'browser:getContext', pattern: 'invoke' },
+  { path: 'window.deepseek.permissions.request()', desc: 'Request permission', safe: true, channel: 'permissions:request', pattern: 'invoke' },
 ]
 
 const blockedApis = [
@@ -169,11 +171,23 @@ export default function ArchitectureView() {
               <div className="w-2 h-2 rounded-full bg-green-500" />
               <span className="text-xs font-medium text-green-400">Exposed via contextBridge</span>
             </div>
-            <div className="p-3 space-y-1.5 max-h-80 overflow-y-auto">
+            <div className="p-3 space-y-1.5 max-h-96 overflow-y-auto">
               {ipcApis.map(api => (
-                <div key={api.path} className="flex items-start gap-2 p-2 rounded-lg hover:bg-gray-800/50">
-                  <code className="text-[11px] text-green-300 font-mono flex-1">{api.path}</code>
-                  <span className="text-[10px] text-gray-500 whitespace-nowrap">{api.desc}</span>
+                <div key={api.path} className="p-2 rounded-lg hover:bg-gray-800/50">
+                  <div className="flex items-start gap-2">
+                    <code className="text-[11px] text-green-300 font-mono flex-1">{api.path}</code>
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
+                      api.pattern === 'listen'
+                        ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                        : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                    }`}>
+                      {api.pattern}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <code className="text-[10px] text-gray-600 font-mono">channel: {api.channel}</code>
+                    <span className="text-[10px] text-gray-500">— {api.desc}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -259,6 +273,99 @@ export default function ArchitectureView() {
               <code className="text-[11px] text-purple-300 font-mono">{pkg}</code>
             </motion.div>
           ))}
+        </div>
+      </div>
+
+      {/* Streaming Event Flow */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Zap size={18} className="text-amber-400" />
+          Harness Streaming Event Flow
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-4 text-xs text-gray-500">
+            <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">invoke</span>
+            <span>Request/Response</span>
+            <span className="ml-4 px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">listen</span>
+            <span>Event Stream (AsyncIterable)</span>
+          </div>
+          <div className="space-y-3">
+            {[
+              { type: 'thinking', data: 'string', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20', desc: 'Model reasoning in progress' },
+              { type: 'message', data: 'string', color: 'text-green-400 bg-green-500/10 border-green-500/20', desc: 'Generated text chunk' },
+              { type: 'tool_call', data: '{ tool: string, args: unknown }', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', desc: 'Agent requesting tool execution' },
+              { type: 'tool_result', data: '{ tool: string, result: unknown }', color: 'text-orange-400 bg-orange-500/10 border-orange-500/20', desc: 'Tool execution result' },
+              { type: 'approval_required', data: '{ action: string, context: object }', color: 'text-red-400 bg-red-500/10 border-red-500/20', desc: 'Awaiting user approval' },
+              { type: 'completed', data: 'void', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', desc: 'Task finished successfully' },
+              { type: 'error', data: '{ message: string }', color: 'text-red-400 bg-red-500/10 border-red-500/20', desc: 'Error occurred' },
+            ].map((event, i) => (
+              <motion.div
+                key={event.type}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/30 border border-gray-800"
+              >
+                <span className={`text-[11px] px-2 py-1 rounded font-mono font-medium border ${event.color}`}>
+                  {event.type}
+                </span>
+                <code className="text-[10px] text-gray-500 font-mono flex-1">data: {event.data}</code>
+                <span className="text-[10px] text-gray-600 hidden sm:block">{event.desc}</span>
+              </motion.div>
+            ))}
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <p className="text-[11px] text-gray-400">
+              <span className="text-purple-400 font-medium">Streaming pattern:</span>{' '}
+              <code className="text-gray-300">onStream(callback) → teardown()</code>{' '}
+              — Returns a cleanup function to remove the IPC listener.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Native Integration Chain */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Lock size={18} className="text-green-400" />
+          Native Secret Store Integration
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            {[
+              { label: 'LinuxSecretStore', sub: 'packages/secrets', color: 'text-green-400 bg-green-500/10 border-green-500/20' },
+              { label: 'keytar', sub: 'npm package', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+              { label: 'libsecret', sub: 'OS library', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
+              { label: 'Secret Service', sub: 'D-Bus API', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+            ].map((item, i) => (
+              <div key={item.label} className="flex items-center gap-2">
+                <div className={`px-3 py-2 rounded-lg border text-center ${item.color}`}>
+                  <div className="text-xs font-medium">{item.label}</div>
+                  <div className="text-[10px] opacity-70">{item.sub}</div>
+                </div>
+                {i < 3 && <ArrowRight size={14} className="text-gray-600" />}
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+            {[
+              { name: 'GNOME Keyring', distro: 'Ubuntu/Fedora' },
+              { name: 'KDE KWallet', distro: 'Kubuntu/KDE' },
+              { name: 'macOS Keychain', distro: 'macOS' },
+            ].map(backend => (
+              <div key={backend.name} className="p-2 rounded-lg bg-gray-800/30 border border-gray-800">
+                <div className="text-[11px] text-gray-300 font-medium">{backend.name}</div>
+                <div className="text-[10px] text-gray-600">{backend.distro}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <p className="text-[11px] text-gray-400">
+              <span className="text-green-400 font-medium">SERVICE_NAME:</span>{' '}
+              <code className="text-gray-300">'DeepSeek Desktop'</code>{' '}
+              — All credentials stored under this service identifier in the OS keyring.
+            </p>
+          </div>
         </div>
       </div>
     </div>

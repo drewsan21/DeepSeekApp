@@ -19,7 +19,8 @@ import {
   Shield,
   CheckSquare,
   Route,
-  FolderOpen
+  FolderOpen,
+  CheckCircle
 } from 'lucide-react'
 
 const stats = [
@@ -264,6 +265,78 @@ export default function OverviewPanel() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Next Implementation Steps */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Zap size={18} className="text-amber-400" />
+          Next Implementation Steps
+        </h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          {[
+            {
+              phase: 'Phase 4',
+              title: 'AuthWindow',
+              description: 'Isolated BrowserWindow that intercepts DeepSeek web login, extracts session securely, and locks down navigation',
+              icon: <Key size={24} />,
+              gradient: 'from-blue-600 to-blue-800',
+              features: ['Sandboxed window', 'Navigation restrictions', 'Session extraction', 'Credential isolation']
+            },
+            {
+              phase: 'Phase 3',
+              title: 'Harness Adapter',
+              description: 'Wrapper that spawns/manages existing DeepSeek CLI/Agent process and bridges stdio/WebSocket streams into Electron IPC',
+              icon: <Cpu size={24} />,
+              gradient: 'from-purple-600 to-purple-800',
+              features: ['Process management', 'Stream bridging', 'Event translation', 'Error recovery']
+            },
+            {
+              phase: 'Phase 6',
+              title: 'Browser Engine',
+              description: 'BrowserManager and Tab system using Electron webview/BrowserView to isolate web pages from the agent',
+              icon: <Globe size={24} />,
+              gradient: 'from-emerald-600 to-emerald-800',
+              features: ['Tab management', 'Page isolation', 'Context extraction', 'Action bridge']
+            },
+          ].map((step, i) => (
+            <motion.div
+              key={step.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.15 }}
+              className="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 hover:border-gray-700 transition-colors"
+            >
+              <div className={`h-1 bg-gradient-to-r ${step.gradient}`} />
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${step.gradient} flex items-center justify-center text-white`}>
+                    {step.icon}
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-gray-800 text-gray-500 border border-gray-700">
+                    {step.phase}
+                  </span>
+                </div>
+                <h3 className="font-semibold text-sm mb-2">{step.title}</h3>
+                <p className="text-xs text-gray-500 mb-3 leading-relaxed">{step.description}</p>
+                <ul className="space-y-1.5">
+                  {step.features.map(feature => (
+                    <li key={feature} className="flex items-center gap-2 text-xs text-gray-400">
+                      <CheckCircle size={10} className="text-green-400" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-emerald-500/5 border border-gray-800">
+          <p className="text-xs text-gray-400 text-center">
+            <span className="text-blue-400 font-medium">Foundation complete.</span>{' '}
+            Choose the next system to implement based on priority.
+          </p>
         </div>
       </div>
     </div>
