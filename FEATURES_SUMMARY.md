@@ -446,12 +446,67 @@ This document summarizes all the features implemented in the DeepSeek Desktop da
 
 ## 📊 Statistics
 
-- **Total Features**: 59
+- **Total Features**: 65
 - **Architecture Features**: 15
-- **Component Features**: 13
+- **Component Features**: 19
 - **Feature Matrix Features**: 14
 - **Security Features**: 10
 - **Overview Features**: 7
+
+## ✅ New Services & Expanded APIs
+
+### 60. PermissionManager Service
+- **Location**: Component Explorer
+- **Features**:
+  - Non-secret site permissions storage in JSON
+  - Storage: `<userData>/permissions.json`
+  - Methods: init(), list(), get(), set(), reset(), has()
+  - Default permissions: read_page, read_selection
+  - 12 permission types supported
+
+### 61. ProviderConfigManager Service
+- **Location**: Component Explorer
+- **Features**:
+  - Non-secret provider configuration storage in JSON
+  - Storage: `<userData>/providers.json`
+  - Methods: init(), list(), configure()
+  - 4 providers: deepseek-account, deepseek-api, custom-openai, local-model
+  - API keys stored in SecretStore (not JSON)
+  - Provider registry with needsApiKey flags
+
+### 62. Expanded IPC Channels
+- **Location**: Component Explorer
+- **Features**:
+  - Browser events: tab-updated, tab-closed, context-action
+  - Provider handlers: list, getConfig, configure, select
+  - Permission handlers: listSites, getSite, setSite, resetSite
+  - Total: 11 new IPC channels
+
+### 63. Expanded Preload API
+- **Location**: Component Explorer
+- **Features**:
+  - Browser API: 11 methods (open, newTab, listTabs, getActiveTab, activateTab, closeTab, setBounds, getPageContext, onTabUpdated, onTabClosed, onContextAction)
+  - Permissions API: 5 methods (request, listSites, getSite, setSite, resetSite)
+  - Providers API: 4 methods (list, select, getConfig, configure)
+  - Total: 20 new API methods
+
+### 64. Expanded Renderer Types
+- **Location**: Component Explorer
+- **Features**:
+  - Permission type: 12 permission union types
+  - ProviderPublicConfig interface: id, label, connected, baseUrl, hasApiKey, needsApiKey
+  - ProviderConfigureRequest interface: id, baseUrl, apiKey
+  - BrowserTab interface: id, url, title, loading
+  - BrowserContextAction: 5 action types
+  - SitePermission interface: origin, permissions, updatedAt
+
+### 65. Expanded Store State
+- **Location**: Component Explorer
+- **Features**:
+  - New state: tabs[], activeTabId, sitePermissions[], providerConfigs[], settingsLoaded
+  - New actions: createTab, refreshTabs, activateTab, closeTab, handleBrowserContextAction, loadSettings, saveSitePermissions, resetSitePermissions, configureProvider
+  - Constants: ALL_PERMISSIONS (12 types), PERMISSION_LABELS (mapping)
+  - Event handlers: onTabUpdated, onTabClosed, onContextAction
 
 ## 🎯 Key Achievements
 
@@ -460,11 +515,15 @@ This document summarizes all the features implemented in the DeepSeek Desktop da
 3. **Component Documentation**: All core components with interfaces
 4. **Feature Audit**: Complete DeepSeek++ feature matrix
 5. **UI/UX Design**: Dark theme, responsive layout, interactive elements
-6. **State Management**: Zustand store visualization
+6. **State Management**: Zustand store visualization with 20+ actions
 7. **Event Systems**: EventEmitter patterns, streaming flows
 8. **Browser Integration**: Tab management, context menus, viewport sync
 9. **Settings System**: Permissions, providers, account settings
 10. **Packaging**: Debian packaging with Electron Builder
+11. **Service Layer**: PermissionManager and ProviderConfigManager services
+12. **Type Safety**: Complete TypeScript type definitions for all APIs
+13. **Data Persistence**: JSON storage for non-secret configuration
+14. **Secret Management**: Integration with OS keyring for API keys
 
 ## 🚀 Ready for Production
 
@@ -479,5 +538,10 @@ The dashboard now provides a complete visualization of the DeepSeek Desktop impl
 - Browser integration
 - Settings and configuration
 - Packaging and deployment
+- Service layer (PermissionManager, ProviderConfigManager)
+- Expanded IPC channels (11 new channels)
+- Expanded preload API (20 new methods)
+- Complete type definitions (12 permissions, provider configs, browser types)
+- Expanded store state (5 new state properties, 9 new actions)
 
 All features are interactive, responsive, and fully documented within the dashboard interface.

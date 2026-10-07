@@ -17,7 +17,8 @@ import {
   Monitor,
   Network,
   Zap,
-  Menu
+  Menu,
+  Settings
 } from 'lucide-react'
 
 interface ComponentDef {
@@ -769,6 +770,380 @@ export default function ComponentExplorer() {
                   {item.label}
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* PermissionManager Service */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Shield size={18} className="text-emerald-400" />
+          PermissionManager Service
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Service Overview</h3>
+              <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+                <code className="text-[10px] text-emerald-300 font-mono block">
+                  apps/desktop/electron/services/PermissionManager.ts
+                </code>
+                <div className="mt-2 text-[10px] text-gray-400">
+                  Stores non-secret site permissions in JSON
+                </div>
+              </div>
+              <div className="mt-3 p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">Storage</div>
+                <code className="text-[11px] text-emerald-300 font-mono">
+                  {'<userData>/permissions.json'}
+                </code>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Methods</h3>
+              <div className="space-y-1.5">
+                {[
+                  { method: 'init()', desc: 'Load from disk' },
+                  { method: 'list()', desc: 'Get all site permissions' },
+                  { method: 'get(origin)', desc: 'Get permissions for site' },
+                  { method: 'set(origin, perms)', desc: 'Update site permissions' },
+                  { method: 'reset(origin)', desc: 'Reset to defaults' },
+                  { method: 'has(origin, perm)', desc: 'Check permission' },
+                ].map(item => (
+                  <div key={item.method} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-emerald-300 font-mono flex-1">{item.method}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Default Permissions</h3>
+            <div className="flex flex-wrap gap-1.5">
+              {['read_page', 'read_selection'].map(perm => (
+                <span key={perm} className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                  {perm}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ProviderConfigManager Service */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Settings size={18} className="text-blue-400" />
+          ProviderConfigManager Service
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Service Overview</h3>
+              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <code className="text-[10px] text-blue-300 font-mono block">
+                  apps/desktop/electron/services/ProviderConfigManager.ts
+                </code>
+                <div className="mt-2 text-[10px] text-gray-400">
+                  Stores non-secret provider config in JSON
+                </div>
+              </div>
+              <div className="mt-3 p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">Storage</div>
+                <code className="text-[11px] text-blue-300 font-mono">
+                  {'<userData>/providers.json'}
+                </code>
+              </div>
+              <div className="mt-2 p-2 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                <div className="text-[10px] text-amber-300">
+                  ⚠ API keys stored in SecretStore, not JSON
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Methods</h3>
+              <div className="space-y-1.5">
+                {[
+                  { method: 'init()', desc: 'Load from disk' },
+                  { method: 'list(auth)', desc: 'Get all providers' },
+                  { method: 'configure(req)', desc: 'Update provider config' },
+                ].map(item => (
+                  <div key={item.method} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-blue-300 font-mono flex-1">{item.method}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Provider Registry</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'deepseek-account', label: 'DeepSeek Account', needsKey: false },
+                { id: 'deepseek-api', label: 'DeepSeek API', needsKey: true },
+                { id: 'custom-openai', label: 'Custom OpenAI', needsKey: true },
+                { id: 'local-model', label: 'Local Model', needsKey: false },
+              ].map(provider => (
+                <div key={provider.id} className="p-2 rounded bg-gray-900/50 border border-gray-700">
+                  <div className="text-[11px] text-blue-300 font-medium">{provider.label}</div>
+                  <div className="text-[9px] text-gray-500 mt-0.5">
+                    {provider.needsKey ? 'Requires API key' : 'No API key needed'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded IPC Channels */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Network size={18} className="text-purple-400" />
+          Expanded IPC Channels
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Browser Events</h3>
+              <div className="space-y-1.5">
+                {[
+                  { channel: 'browser:tab-updated', type: 'event' },
+                  { channel: 'browser:tab-closed', type: 'event' },
+                  { channel: 'browser:context-action', type: 'event' },
+                ].map(item => (
+                  <div key={item.channel} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[10px] text-purple-300 font-mono flex-1">{item.channel}</code>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                      {item.type}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Provider Handlers</h3>
+              <div className="space-y-1.5">
+                {[
+                  { channel: 'providers:list', type: 'invoke' },
+                  { channel: 'providers:getConfig', type: 'invoke' },
+                  { channel: 'providers:configure', type: 'invoke' },
+                  { channel: 'providers:select', type: 'invoke' },
+                ].map(item => (
+                  <div key={item.channel} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[10px] text-purple-300 font-mono flex-1">{item.channel}</code>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      {item.type}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Permission Handlers</h3>
+              <div className="space-y-1.5">
+                {[
+                  { channel: 'permissions:listSites', type: 'invoke' },
+                  { channel: 'permissions:getSite', type: 'invoke' },
+                  { channel: 'permissions:setSite', type: 'invoke' },
+                  { channel: 'permissions:resetSite', type: 'invoke' },
+                ].map(item => (
+                  <div key={item.channel} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[10px] text-purple-300 font-mono flex-1">{item.channel}</code>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      {item.type}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Preload API */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Terminal size={18} className="text-cyan-400" />
+          Expanded Preload API
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Browser API</h3>
+              <div className="space-y-1">
+                {[
+                  'open(url)',
+                  'newTab(url)',
+                  'listTabs()',
+                  'getActiveTab()',
+                  'activateTab(tabId)',
+                  'closeTab(tabId)',
+                  'setBounds(bounds)',
+                  'getPageContext(tabId)',
+                  'onTabUpdated(cb)',
+                  'onTabClosed(cb)',
+                  'onContextAction(cb)',
+                ].map(method => (
+                  <code key={method} className="text-[10px] text-cyan-300 font-mono block">
+                    window.deepseek.browser.{method}
+                  </code>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Permissions API</h3>
+              <div className="space-y-1">
+                {[
+                  'request(permission)',
+                  'listSites()',
+                  'getSite(origin)',
+                  'setSite(origin, perms)',
+                  'resetSite(origin)',
+                ].map(method => (
+                  <code key={method} className="text-[10px] text-cyan-300 font-mono block">
+                    window.deepseek.permissions.{method}
+                  </code>
+                ))}
+              </div>
+              <div className="mt-4">
+                <h3 className="text-xs font-medium text-gray-400 mb-2">Providers API</h3>
+                <div className="space-y-1">
+                  {[
+                    'list()',
+                    'select(providerId)',
+                    'getConfig()',
+                    'configure(request)',
+                  ].map(method => (
+                    <code key={method} className="text-[10px] text-cyan-300 font-mono block">
+                      window.deepseek.providers.{method}
+                    </code>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Renderer Types */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Code size={18} className="text-indigo-400" />
+          Expanded Renderer Types
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Permission Types</h3>
+              <div className="p-3 rounded-lg bg-indigo-500/5 border border-indigo-500/20">
+                <code className="text-[10px] text-indigo-300 font-mono block whitespace-pre-wrap">
+{`type Permission =
+  | 'read_page'
+  | 'read_selection'
+  | 'navigate'
+  | 'click'
+  | 'type'
+  | 'download'
+  | 'upload'
+  | 'clipboard_read'
+  | 'clipboard_write'
+  | 'external_app'
+  | 'file_read'
+  | 'file_write';`}
+                </code>
+              </div>
+              <div className="mt-3 p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">Total: 12 permissions</div>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Provider Config Types</h3>
+              <div className="p-3 rounded-lg bg-indigo-500/5 border border-indigo-500/20">
+                <code className="text-[10px] text-indigo-300 font-mono block whitespace-pre-wrap">
+{`interface ProviderPublicConfig {
+  id: string;
+  label: string;
+  connected: boolean;
+  baseUrl?: string;
+  hasApiKey: boolean;
+  needsApiKey: boolean;
+}
+
+interface ProviderConfigureRequest {
+  id: string;
+  baseUrl?: string;
+  apiKey?: string;
+}`}
+                </code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Store State */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Database size={18} className="text-pink-400" />
+          Expanded Store State
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">New State Properties</h3>
+              <div className="space-y-1.5">
+                {[
+                  { prop: 'tabs', type: 'BrowserTab[]', desc: 'All open tabs' },
+                  { prop: 'activeTabId', type: 'string | null', desc: 'Current active tab' },
+                  { prop: 'sitePermissions', type: 'SitePermission[]', desc: 'Site permissions' },
+                  { prop: 'providerConfigs', type: 'ProviderPublicConfig[]', desc: 'Provider configs' },
+                  { prop: 'settingsLoaded', type: 'boolean', desc: 'Settings loaded flag' },
+                ].map(item => (
+                  <div key={item.prop} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-pink-300 font-mono flex-1">{item.prop}</code>
+                    <code className="text-[10px] text-gray-500 font-mono">{item.type}</code>
+                    <span className="text-[10px] text-gray-600 hidden lg:block">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">New Actions</h3>
+              <div className="space-y-1.5">
+                {[
+                  { action: 'createTab(url)', desc: 'Create new tab' },
+                  { action: 'refreshTabs()', desc: 'Refresh tab list' },
+                  { action: 'activateTab(tabId)', desc: 'Switch to tab' },
+                  { action: 'closeTab(tabId)', desc: 'Close tab' },
+                  { action: 'handleBrowserContextAction()', desc: 'Handle context menu' },
+                  { action: 'loadSettings()', desc: 'Load all settings' },
+                  { action: 'saveSitePermissions()', desc: 'Save permissions' },
+                  { action: 'resetSitePermissions()', desc: 'Reset permissions' },
+                  { action: 'configureProvider()', desc: 'Configure provider' },
+                ].map(item => (
+                  <div key={item.action} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-pink-300 font-mono flex-1">{item.action}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Constants</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <code className="text-[10px] text-pink-300 font-mono block mb-1">ALL_PERMISSIONS</code>
+                <div className="text-[9px] text-gray-500">Array of all 12 permission types</div>
+              </div>
+              <div>
+                <code className="text-[10px] text-pink-300 font-mono block mb-1">PERMISSION_LABELS</code>
+                <div className="text-[9px] text-gray-500">Map of permission → display label</div>
+              </div>
             </div>
           </div>
         </div>
