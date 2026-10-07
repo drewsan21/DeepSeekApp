@@ -473,6 +473,72 @@ export default function ComponentExplorer() {
           </div>
         </div>
       </div>
+
+      {/* DeepSeekDesktopApi Bridge */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Network size={18} className="text-blue-400" />
+          DeepSeekDesktopApi Bridge Interface
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20 mb-4">
+            <code className="text-[11px] text-blue-300 font-mono block">window.deepseek: DeepSeekDesktopApi</code>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            {[
+              {
+                namespace: 'auth',
+                methods: ['login(): Promise<boolean>', 'logout(): Promise<void>', 'status(): Promise<AuthStatus>'],
+                color: 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+              },
+              {
+                namespace: 'providers',
+                methods: ['list(): Promise<ProviderSummary[]>', 'select(id): Promise<void>'],
+                color: 'text-purple-400 bg-purple-500/10 border-purple-500/20'
+              },
+              {
+                namespace: 'harness',
+                methods: ['start(req): Promise<{started}>', 'stop(): Promise<void>', 'onStream(cb): () => void'],
+                color: 'text-orange-400 bg-orange-500/10 border-orange-500/20'
+              },
+              {
+                namespace: 'browser',
+                methods: ['open(url): Promise<string>', 'close(tabId): Promise<void>', 'setBounds(bounds): void', 'getPageContext(id): Promise<PageContext>', 'getActiveTab(): Promise<string>'],
+                color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+              },
+              {
+                namespace: 'approvals',
+                methods: ['respond(id, response): Promise<void>'],
+                color: 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+              },
+              {
+                namespace: 'permissions',
+                methods: ['request(permission): Promise<boolean>'],
+                color: 'text-red-400 bg-red-500/10 border-red-500/20'
+              },
+            ].map((ns, i) => (
+              <motion.div
+                key={ns.namespace}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className={`p-3 rounded-lg border ${ns.color}`}
+              >
+                <h3 className="text-xs font-medium mb-2">
+                  <code className="font-mono">{ns.namespace}</code>
+                </h3>
+                <div className="space-y-1">
+                  {ns.methods.map(method => (
+                    <code key={method} className="text-[10px] text-gray-400 font-mono block">
+                      {method}
+                    </code>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

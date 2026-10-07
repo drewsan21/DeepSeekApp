@@ -339,6 +339,58 @@ export default function OverviewPanel() {
           </p>
         </div>
       </div>
+
+      {/* UI Surfaces Preview */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Monitor size={18} className="text-pink-400" />
+          Renderer UI Surfaces
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
+              <h3 className="text-sm font-medium text-blue-300 mb-2">Workspace Layout</h3>
+              <p className="text-[11px] text-gray-400 mb-3">Primary Harness task surface with provider/model selection, tool toggles, and event stream</p>
+              <div className="space-y-1 text-[10px] text-gray-500">
+                <div>• TopBar: Provider/Model dropdowns</div>
+                <div>• Sidebar: Harness/Browser/Settings nav</div>
+                <div>• WorkspacePanel: Task config + output</div>
+                <div>• Tool toggles: Browser, PageContext, FS</div>
+                <div>• Approval mode: Ask / Auto-deny</div>
+              </div>
+            </div>
+            <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20">
+              <h3 className="text-sm font-medium text-purple-300 mb-2">Command Palette</h3>
+              <p className="text-[11px] text-gray-400 mb-3">Quick command search with keyboard shortcuts for common actions</p>
+              <div className="space-y-1 text-[10px] text-gray-500">
+                <div>• Ctrl+Shift+P: Open palette</div>
+                <div>• Ctrl+Shift+S: Summarize page</div>
+                <div>• Ctrl+Shift+A: Ask about selection</div>
+                <div>• Ctrl+Shift+D: Open Harness</div>
+                <div>• Ctrl+Shift+B: Toggle browser</div>
+              </div>
+            </div>
+            <div className="p-4 rounded-lg bg-amber-500/5 border border-amber-500/20">
+              <h3 className="text-sm font-medium text-amber-300 mb-2">Approval Modals</h3>
+              <p className="text-[11px] text-gray-400 mb-3">User approval dialogs for agent actions with risk levels and scope options</p>
+              <div className="space-y-1 text-[10px] text-gray-500">
+                <div>• Risk levels: normal / danger</div>
+                <div>• Decisions: allow_once, allow_site, deny</div>
+                <div>• Scope: session, site, workspace</div>
+                <div>• Triggered by approval_required events</div>
+                <div>• Responds via approvals.respond()</div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <p className="text-[11px] text-gray-400">
+              <span className="text-pink-400 font-medium">State Management:</span>{' '}
+              Zustand store (<code className="text-gray-300">useStore.ts</code>) manages all UI state and communicates exclusively through{' '}
+              <code className="text-gray-300">window.deepseek</code> bridge
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

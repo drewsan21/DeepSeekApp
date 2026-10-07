@@ -601,6 +601,159 @@ export default function ArchitectureView() {
           </div>
         </div>
       </div>
+
+      {/* Renderer UI Structure */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Monitor size={18} className="text-pink-400" />
+          Renderer UI Structure
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-3">Component Hierarchy</h3>
+              <div className="space-y-1.5">
+                {[
+                  { component: 'App.tsx', desc: 'Root shell + global shortcuts', level: 0 },
+                  { component: 'TopBar.tsx', desc: 'Provider/Model selection, Account', level: 1 },
+                  { component: 'Sidebar.tsx', desc: 'Navigation (Harness/Browser/Settings)', level: 1 },
+                  { component: 'WorkspacePanel.tsx', desc: 'Harness task surface', level: 1 },
+                  { component: 'BrowserPanel.tsx', desc: 'Browser viewport + side panel', level: 1 },
+                  { component: 'SettingsPanel.tsx', desc: 'Configuration UI', level: 1 },
+                  { component: 'CommandPalette.tsx', desc: 'Modal command search', level: 0 },
+                  { component: 'ApprovalModal.tsx', desc: 'Action approval dialogs', level: 0 },
+                ].map((item, i) => (
+                  <motion.div
+                    key={item.component}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30"
+                    style={{ marginLeft: `${item.level * 12}px` }}
+                  >
+                    <code className="text-[11px] text-pink-300 font-mono">{item.component}</code>
+                    <span className="text-[10px] text-gray-500">— {item.desc}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-3">State Management</h3>
+              <div className="space-y-2">
+                <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap size={14} className="text-purple-400" />
+                    <span className="text-xs font-medium text-purple-300">Zustand Store</span>
+                  </div>
+                  <code className="text-[10px] text-gray-400 font-mono block">useStore.ts</code>
+                </div>
+                <div className="space-y-1">
+                  {[
+                    'view: workspace | browser | settings',
+                    'authStatus: AuthStatus',
+                    'providers: ProviderSummary[]',
+                    'selectedProvider: string',
+                    'selectedModel: string',
+                    'paletteOpen: boolean',
+                    'approvals: ApprovalRequest[]',
+                    'harnessEvents: HarnessEvent[]',
+                    'activeTabId: string | null',
+                    'browserUrl: string',
+                  ].map(state => (
+                    <div key={state} className="flex items-center gap-2 p-1.5 rounded bg-gray-800/30">
+                      <div className="w-1 h-1 rounded-full bg-purple-500" />
+                      <code className="text-[10px] text-gray-400 font-mono">{state}</code>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Browser Viewport Synchronization */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Globe size={18} className="text-cyan-400" />
+          Browser Viewport Synchronization
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="space-y-3">
+            <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+              <h3 className="text-xs font-medium text-gray-400 mb-2">ResizeObserver Pattern</h3>
+              <div className="flex items-center gap-2 text-[11px]">
+                <span className="px-2 py-1 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  viewportRef
+                </span>
+                <ArrowRight size={12} className="text-gray-600" />
+                <span className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  getBoundingClientRect()
+                </span>
+                <ArrowRight size={12} className="text-gray-600" />
+                <span className="px-2 py-1 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                  setBrowserBounds()
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">BrowserBounds</div>
+                <div className="space-y-0.5">
+                  <code className="text-[10px] text-cyan-300 font-mono block">x: number</code>
+                  <code className="text-[10px] text-cyan-300 font-mono block">y: number</code>
+                  <code className="text-[10px] text-cyan-300 font-mono block">width: number</code>
+                  <code className="text-[10px] text-cyan-300 font-mono block">height: number</code>
+                </div>
+              </div>
+              <div className="p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">Triggers</div>
+                <div className="space-y-0.5">
+                  <div className="text-[10px] text-gray-400">• ResizeObserver callback</div>
+                  <div className="text-[10px] text-gray-400">• Window resize event</div>
+                  <div className="text-[10px] text-gray-400">• View change (hide when not browser)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Security Policy */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Shield size={18} className="text-green-400" />
+          Renderer Content Security Policy
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="p-3 rounded-lg bg-green-500/5 border border-green-500/20 mb-4">
+            <code className="text-[11px] text-green-300 font-mono block whitespace-pre-wrap">
+{`default-src 'self';
+script-src 'self';
+style-src 'self' 'unsafe-inline';
+img-src 'self' data: https:;
+connect-src 'self' https: wss: ws:;
+object-src 'none';
+frame-src 'none';`}
+            </code>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            {[
+              { directive: "default-src 'self'", desc: 'Only load resources from same origin' },
+              { directive: "script-src 'self'", desc: 'No external scripts allowed' },
+              { directive: "style-src 'unsafe-inline'", desc: 'Allow inline styles (Tailwind)' },
+              { directive: "object-src 'none'", desc: 'Block plugins (Flash, Java)' },
+              { directive: "frame-src 'none'", desc: 'Block iframes completely' },
+              { directive: "connect-src wss: ws:", desc: 'Allow WebSocket connections' },
+            ].map(item => (
+              <div key={item.directive} className="p-2 rounded-lg bg-gray-800/30">
+                <code className="text-[10px] text-green-300 font-mono block mb-1">{item.directive}</code>
+                <span className="text-[10px] text-gray-500">{item.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
