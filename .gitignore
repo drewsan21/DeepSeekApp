@@ -1,5 +1,34 @@
+# Dependencies (reinstall with ./install.sh or install.bat)
 node_modules/
-.next/
+
+# Local npm cache
+.npm-cache/
+
+# Build output
 dist/
-build/
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.next/
+build/
