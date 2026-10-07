@@ -43,6 +43,16 @@ http://localhost:3000
 
 If port 3000 is busy, the script will automatically try the next available port.
 
+### ⚠️ Important: Shell Script Permissions
+
+If you cloned this repository on Linux/macOS and the scripts aren't executable, run:
+
+```bash
+chmod +x install.sh start.sh serve.sh
+```
+
+This is automatically handled by `.gitattributes` but may need manual fixing in some cases.
+
 ## 📁 Project Structure
 
 ```
@@ -151,3 +161,83 @@ The plan covers **11 development phases**, **12 core packages**, **46+ security 
 ## 📄 License
 
 This project is provided as an implementation reference.
+
+## 🐙 Publishing to GitHub
+
+This repository is ready for GitHub publishing with the following features:
+
+### ✅ Included Files
+- **`.gitignore`** — Comprehensive ignore rules for node_modules, dist, logs, etc.
+- **`.gitattributes`** — Proper line ending handling (LF for Unix, CRLF for Windows batch files)
+- **`LICENSE`** — MIT license for open source
+- **`CONTRIBUTING.md`** — Guidelines for contributors
+- **`README.md`** — Complete documentation
+
+### 📦 What's Not Tracked
+The following are automatically excluded from Git:
+- `node_modules/` — Dependencies (reinstall with `./install.sh`)
+- `dist/` — Build output (regenerate with `npm run build`)
+- `.npm-cache/` — Local npm cache
+- Log files, editor configs, OS-specific files
+
+### 🔧 Common Issues & Solutions
+
+**Issue: Shell scripts not executable after clone**
+```bash
+# Fix permissions
+chmod +x install.sh start.sh serve.sh
+```
+
+**Issue: Line ending warnings**
+The `.gitattributes` file handles this automatically. If you see warnings:
+```bash
+# Renormalize line endings
+git add .gitattributes
+git rm --cached -r .
+git reset --hard
+```
+
+**Issue: Large files in Git history**
+If you accidentally committed large files:
+```bash
+# Use git-filter-repo or BFG Repo-Cleaner
+# See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository
+```
+
+**Issue: package-lock.json conflicts**
+This is normal. Accept incoming changes and run:
+```bash
+npm install
+```
+
+### 🚀 Creating a New Repository
+
+1. Create a new repository on GitHub
+2. Don't initialize with README (we already have one)
+3. Follow GitHub's instructions to push:
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git push -u origin main
+```
+
+### 📋 Pre-Push Checklist
+
+Before pushing to GitHub, ensure:
+- [ ] No sensitive data (API keys, tokens, passwords) in code
+- [ ] `.gitignore` is working (run `git status` to verify)
+- [ ] README is complete and accurate
+- [ ] LICENSE file is present
+- [ ] All tests pass
+- [ ] Build succeeds (`npm run build`)
+- [ ] No large binary files (>100MB)
+
+### 🔒 Security Notes
+
+- Never commit `.env` files with real credentials
+- Use environment variables for sensitive configuration
+- Review all code before pushing to ensure no secrets are exposed
+- Enable GitHub's secret scanning for additional protection
