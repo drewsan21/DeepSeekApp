@@ -19,7 +19,9 @@ import {
   PanelRight,
   Menu,
   Shield,
-  Zap
+  Zap,
+  Settings,
+  AlertTriangle
 } from 'lucide-react'
 
 interface Feature {
@@ -486,6 +488,188 @@ export default function FeatureMatrix() {
                     <span className="text-[10px] text-gray-500 ml-auto">{item.desc}</span>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Command Palette Interaction Model */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Search size={18} className="text-indigo-400" />
+          Command Palette Interaction Model
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Keyboard Navigation</h3>
+              <div className="space-y-1.5">
+                {[
+                  { key: 'Escape', action: 'Close palette' },
+                  { key: 'ArrowDown', action: 'Move selection down' },
+                  { key: 'ArrowUp', action: 'Move selection up' },
+                  { key: 'Enter', action: 'Execute selected command' },
+                ].map(item => (
+                  <div key={item.key} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <kbd className="px-2 py-0.5 rounded bg-gray-800 border border-gray-700 text-[11px] text-indigo-300 font-mono min-w-[60px] text-center">
+                      {item.key}
+                    </kbd>
+                    <span className="text-[11px] text-gray-400">{item.action}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Filtering Behavior</h3>
+              <div className="space-y-2">
+                <div className="p-2 rounded-lg bg-gray-800/30">
+                  <div className="text-[10px] text-gray-500 mb-1">Query Processing</div>
+                  <code className="text-[11px] text-indigo-300 font-mono">query.trim().toLowerCase()</code>
+                </div>
+                <div className="p-2 rounded-lg bg-gray-800/30">
+                  <div className="text-[10px] text-gray-500 mb-1">Match Logic</div>
+                  <code className="text-[11px] text-indigo-300 font-mono">label.includes(query)</code>
+                </div>
+                <div className="p-2 rounded-lg bg-gray-800/30">
+                  <div className="text-[10px] text-gray-500 mb-1">Selection Reset</div>
+                  <div className="text-[11px] text-gray-400">Reset to index 0 on query change</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-indigo-500/5 border border-indigo-500/20">
+            <h3 className="text-xs font-medium text-indigo-300 mb-2">Dynamic Commands (Auth-Dependent)</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-2 rounded bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">When authenticated</div>
+                <code className="text-[11px] text-green-300 font-mono">auth.logout → "Sign out"</code>
+              </div>
+              <div className="p-2 rounded bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">When not authenticated</div>
+                <code className="text-[11px] text-blue-300 font-mono">auth.login → "Sign in"</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Settings Panel Structure */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Settings size={18} className="text-gray-400" />
+          Settings Panel Structure
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-3 gap-3">
+            {[
+              {
+                section: 'Account',
+                content: [
+                  'Signed in status',
+                  'Account email display',
+                  'Sign in/out button',
+                ],
+                color: 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+              },
+              {
+                section: 'Providers',
+                content: [
+                  'Radio button selection',
+                  'Provider list from IPC',
+                  'Active provider highlight',
+                ],
+                color: 'text-purple-400 bg-purple-500/10 border-purple-500/20'
+              },
+              {
+                section: 'Permissions',
+                content: [
+                  'Site permissions',
+                  'Clipboard access',
+                  'Download approvals',
+                ],
+                color: 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+              },
+            ].map((section, i) => (
+              <motion.div
+                key={section.section}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className={`p-3 rounded-lg border ${section.color}`}
+              >
+                <h3 className="text-sm font-medium mb-2">{section.section}</h3>
+                <ul className="space-y-1">
+                  {section.content.map(item => (
+                    <li key={item} className="flex items-center gap-2 text-[11px] text-gray-400">
+                      <div className="w-1 h-1 rounded-full bg-gray-600" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Approval Modal UI Details */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <AlertTriangle size={18} className="text-red-400" />
+          Approval Modal UI Details
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Risk-Based Styling</h3>
+              <div className="space-y-2">
+                <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-700">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                    <span className="text-xs font-medium text-gray-300">Normal Risk</span>
+                  </div>
+                  <div className="text-[10px] text-gray-500">Title: "DeepSeek wants to:"</div>
+                  <div className="text-[10px] text-gray-500">Border: default</div>
+                </div>
+                <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/30">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                    <span className="text-xs font-medium text-red-300">Danger Risk</span>
+                  </div>
+                  <div className="text-[10px] text-gray-500">Title: "External action"</div>
+                  <div className="text-[10px] text-gray-500">Border: rgba(215, 58, 73, 0.55)</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Modal Content</h3>
+              <div className="space-y-1.5">
+                {[
+                  { field: 'title', desc: 'Action description (bold)' },
+                  { field: 'description', desc: 'Detailed context (muted)' },
+                  { field: 'origin', desc: 'Source origin (if present)' },
+                  { field: 'details', desc: 'JSON.stringify(payload, null, 2)' },
+                ].map(item => (
+                  <div key={item.field} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-red-300 font-mono">{item.field}</code>
+                    <span className="text-[10px] text-gray-500 ml-auto">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">Action Buttons</div>
+                <div className="flex gap-1.5">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                    Allow once
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-gray-700 text-gray-300 border border-gray-600">
+                    Allow for site
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30">
+                    Deny
+                  </span>
+                </div>
               </div>
             </div>
           </div>

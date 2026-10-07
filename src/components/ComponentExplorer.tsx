@@ -539,6 +539,106 @@ export default function ComponentExplorer() {
           </div>
         </div>
       </div>
+
+      {/* Harness Approval Response Protocol */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Terminal size={18} className="text-amber-400" />
+          Harness Approval Response Protocol
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Request Format (Harness → UI)</h3>
+              <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                <code className="text-[10px] text-amber-300 font-mono block whitespace-pre-wrap">
+{`{
+  "type": "approval_required",
+  "approval": {
+    "id": "approval-123",
+    "title": "Type into search box",
+    "description": "Agent wants to type query",
+    "risk": "normal",
+    "origin": "example.com",
+    "permission": "browser.type",
+    "details": { "text": "query" }
+  }
+}`}
+                </code>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Response Format (UI → Harness)</h3>
+              <div className="p-3 rounded-lg bg-green-500/5 border border-green-500/20">
+                <code className="text-[10px] text-green-300 font-mono block whitespace-pre-wrap">
+{`{
+  "type": "approval_response",
+  "id": "approval-123",
+  "decision": "allow_once",
+  "scope": "session"
+}`}
+                </code>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <p className="text-[11px] text-gray-400">
+              <span className="text-amber-400 font-medium">Communication:</span>{' '}
+              Response sent via <code className="text-gray-300">process.stdin.write(JSON.stringify(payload))</code>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* BrowserManager New Methods */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Globe size={18} className="text-cyan-400" />
+          BrowserManager New Methods
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">setBounds(bounds)</h3>
+              <div className="p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/20">
+                <code className="text-[10px] text-cyan-300 font-mono block whitespace-pre-wrap">
+{`setBounds(bounds: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}) {
+  const view = this.views.get(this.activeTabId);
+  if (!view) return;
+  view.setBounds({
+    x: Math.max(0, bounds.x),
+    y: Math.max(0, bounds.y),
+    width: Math.max(0, bounds.width),
+    height: Math.max(0, bounds.height)
+  });
+}`}
+                </code>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">getActiveTab()</h3>
+              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <code className="text-[10px] text-blue-300 font-mono block whitespace-pre-wrap">
+{`getActiveTab(): string | null {
+  return this.activeTabId;
+}`}
+                </code>
+              </div>
+              <div className="mt-3 p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">Purpose</div>
+                <div className="text-[11px] text-gray-400">
+                  Returns the currently active tab ID for page context extraction
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

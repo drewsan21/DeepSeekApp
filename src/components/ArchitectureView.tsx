@@ -754,6 +754,148 @@ frame-src 'none';`}
           </div>
         </div>
       </div>
+
+      {/* IPC Subscribe Pattern */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Network size={18} className="text-cyan-400" />
+          Preload Subscribe Pattern
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/20 mb-4">
+            <code className="text-[11px] text-cyan-300 font-mono block whitespace-pre-wrap">
+{`function subscribe(channel: string, callback: (data: any) => void) {
+    const listener = (_event: IpcRendererEvent, data: any) => callback(data);
+    ipcRenderer.on(channel, listener);
+    return () => ipcRenderer.removeListener(channel, listener);
+}`}
+            </code>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Usage Pattern</h3>
+              <div className="p-2 rounded-lg bg-gray-800/30">
+                <code className="text-[10px] text-gray-300 font-mono block">
+                  const unsubscribe = subscribe('harness:event', handler);
+                </code>
+                <code className="text-[10px] text-gray-300 font-mono block mt-1">
+                  // Later: unsubscribe();
+                </code>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Benefits</h3>
+              <ul className="space-y-1 text-[11px] text-gray-400">
+                <li>• Automatic cleanup on unmount</li>
+                <li>• Prevents memory leaks</li>
+                <li>• Type-safe callback signatures</li>
+                <li>• Reusable across channels</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Dev/Prod Loading Logic */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Server size={18} className="text-orange-400" />
+          Dev/Prod Window Loading
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Development Mode</h3>
+              <div className="p-3 rounded-lg bg-orange-500/5 border border-orange-500/20">
+                <code className="text-[11px] text-orange-300 font-mono block">
+                  VITE_DEV_SERVER_URL=http://localhost:5173
+                </code>
+                <div className="mt-2 text-[10px] text-gray-400">
+                  Loads from Vite dev server with HMR
+                </div>
+              </div>
+              <div className="mt-2 p-2 rounded-lg bg-gray-800/30">
+                <code className="text-[10px] text-gray-300 font-mono block">
+                  mainWindow.loadURL(devServerUrl);
+                </code>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Production Mode</h3>
+              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <code className="text-[11px] text-blue-300 font-mono block">
+                  renderer/dist/index.html
+                </code>
+                <div className="mt-2 text-[10px] text-gray-400">
+                  Loads bundled static files
+                </div>
+              </div>
+              <div className="mt-2 p-2 rounded-lg bg-gray-800/30">
+                <code className="text-[10px] text-gray-300 font-mono block">
+                  mainWindow.loadFile(path.join(__dirname, '../renderer/dist/index.html'));
+                </code>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <p className="text-[11px] text-gray-400">
+              <span className="text-orange-400 font-medium">Conditional loading:</span>{' '}
+              <code className="text-gray-300">process.env.VITE_DEV_SERVER_URL</code> determines which mode to use
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* registerDesktopIpc Pattern */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Terminal size={18} className="text-purple-400" />
+          registerDesktopIpc Pattern
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20 mb-4">
+            <code className="text-[11px] text-purple-300 font-mono block whitespace-pre-wrap">
+{`export function registerDesktopIpc(
+    mainWindow: BrowserWindow,
+    deps: DesktopIpcDeps
+) {
+    const sendToRenderer = (channel: string, payload: unknown) => {
+        if (!mainWindow.isDestroyed()) {
+            mainWindow.webContents.send(channel, payload);
+        }
+    };
+    // ... handlers
+}`}
+            </code>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">DesktopIpcDeps Interface</h3>
+              <div className="space-y-1">
+                {[
+                  { dep: 'authManager', type: 'AuthManager' },
+                  { dep: 'harness', type: 'DeepSeekHarnessAdapter' },
+                  { dep: 'browserManager', type: 'BrowserManager' },
+                ].map(item => (
+                  <div key={item.dep} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[10px] text-purple-300 font-mono">{item.dep}</code>
+                    <code className="text-[10px] text-gray-500 font-mono ml-auto">{item.type}</code>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">sendToRenderer Helper</h3>
+              <ul className="space-y-1 text-[11px] text-gray-400">
+                <li>• Checks <code className="text-purple-300">isDestroyed()</code></li>
+                <li>• Prevents errors on closed windows</li>
+                <li>• Used for streaming events</li>
+                <li>• Used for approval requests</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
