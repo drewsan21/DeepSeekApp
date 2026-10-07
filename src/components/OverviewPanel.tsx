@@ -391,6 +391,55 @@ export default function OverviewPanel() {
           </div>
         </div>
       </div>
+
+      {/* Dark Theme Palette */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Eye size={18} className="text-indigo-400" />
+          Dark Theme Design System
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 mb-4">
+            {[
+              { name: '--bg', value: '#0b0f14', label: 'Background' },
+              { name: '--panel', value: '#10161d', label: 'Panel' },
+              { name: '--panel-2', value: '#0f151c', label: 'Panel Alt' },
+              { name: '--border', value: '#1d2732', label: 'Border' },
+              { name: '--text', value: '#e6eef5', label: 'Text' },
+              { name: '--muted', value: '#93a4b3', label: 'Muted' },
+              { name: '--accent', value: '#2f81f7', label: 'Accent' },
+              { name: '--danger', value: '#d73a49', label: 'Danger' },
+            ].map(color => (
+              <div key={color.name} className="flex flex-col items-center">
+                <div
+                  className="w-full h-12 rounded-lg border border-gray-700 mb-1"
+                  style={{ backgroundColor: color.value }}
+                />
+                <code className="text-[9px] text-gray-400 font-mono">{color.value}</code>
+                <span className="text-[9px] text-gray-600">{color.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Typography</h3>
+              <div className="space-y-1 text-[10px]">
+                <div className="text-gray-300">Font: Inter, system-ui, -apple-system</div>
+                <div className="text-gray-300">Base size: 14px</div>
+                <div className="text-gray-300">Color scheme: dark</div>
+              </div>
+            </div>
+            <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Component Styles</h3>
+              <div className="space-y-1 text-[10px]">
+                <div className="text-gray-300">Border radius: 8-14px</div>
+                <div className="text-gray-300">Button padding: 8px 10px</div>
+                <div className="text-gray-300">Input padding: 8px 10px</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
