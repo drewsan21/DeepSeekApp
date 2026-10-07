@@ -1,5 +1,7 @@
 {
-  "name": "sandbox-workspace",
+  "name": "deepseek-desktop",
+  "version": "0.1.0",
+  "description": "DeepSeek Desktop — Implementation Dashboard",
   "private": true,
   "type": "module",
   "scripts": {

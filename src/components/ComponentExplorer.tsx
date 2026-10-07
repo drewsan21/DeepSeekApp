@@ -16,7 +16,15 @@ import {
   Cpu,
   Monitor,
   Network,
-  Zap
+  Zap,
+  Menu,
+  Settings,
+  User,
+  Server,
+  CheckCircle,
+  Plus,
+  RefreshCw,
+  CheckSquare
 } from 'lucide-react'
 
 interface ComponentDef {
@@ -633,6 +641,1074 @@ export default function ComponentExplorer() {
                 <div className="text-[10px] text-gray-500 mb-1">Purpose</div>
                 <div className="text-[11px] text-gray-400">
                   Returns the currently active tab ID for page context extraction
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Management System */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Layers size={18} className="text-blue-400" />
+          Tab Management System
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">BrowserTabInfo Interface</h3>
+              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <code className="text-[10px] text-blue-300 font-mono block whitespace-pre-wrap">
+{`interface BrowserTabInfo {
+  id: string;
+  url: string;
+  title: string;
+  loading?: boolean;
+}`}
+                </code>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Tab Operations</h3>
+              <div className="space-y-1.5">
+                {[
+                  { method: 'createTab(url)', desc: 'Create new tab', returns: 'tabId' },
+                  { method: 'listTabs()', desc: 'Get all tabs', returns: 'BrowserTabInfo[]' },
+                  { method: 'activateTab(id)', desc: 'Switch to tab', returns: 'void' },
+                  { method: 'closeTab(id)', desc: 'Close and cleanup', returns: 'void' },
+                ].map(item => (
+                  <div key={item.method} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-blue-300 font-mono flex-1">{item.method}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Tab Events (EventEmitter)</h3>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { event: 'tab-created', desc: 'New tab created' },
+                { event: 'tab-updated', desc: 'Tab info changed' },
+                { event: 'tab-closed', desc: 'Tab removed' },
+              ].map(item => (
+                <div key={item.event} className="p-2 rounded bg-gray-900/50 border border-gray-700">
+                  <code className="text-[10px] text-blue-300 font-mono">{item.event}</code>
+                  <div className="text-[9px] text-gray-500 mt-0.5">{item.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Context Menu Integration */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Menu size={18} className="text-purple-400" />
+          Context Menu Integration
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Context Actions</h3>
+              <div className="space-y-1.5">
+                {[
+                  { action: 'ask', label: 'Ask DeepSeek about selection', icon: '💬', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+                  { action: 'summarize', label: 'Summarize selection', icon: '📝', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
+                  { action: 'explain', label: 'Explain selection', icon: '🔍', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
+                  { action: 'rewrite', label: 'Rewrite selection', icon: '✏️', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+                  { action: 'translate', label: 'Translate selection', icon: '🌐', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+                ].map(item => (
+                  <div key={item.action} className={`flex items-center gap-2 p-2 rounded-lg border ${item.color}`}>
+                    <span className="text-sm">{item.icon}</span>
+                    <code className="text-[11px] font-mono">{item.action}</code>
+                    <span className="text-[10px] text-gray-400 ml-auto">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Context Action Payload</h3>
+              <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20">
+                <code className="text-[10px] text-purple-300 font-mono block whitespace-pre-wrap">
+{`interface BrowserContextActionPayload {
+  action: BrowserContextAction;
+  tabId: string;
+  url: string;
+  title: string;
+  selectionText?: string;
+}`}
+                </code>
+              </div>
+              <div className="mt-3 p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">Trigger</div>
+                <div className="text-[11px] text-gray-400">
+                  Right-click on selected text → <code className="text-purple-300">context-menu</code> event
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Menu Structure</h3>
+            <div className="flex flex-col gap-1">
+              {[
+                { label: 'Ask DeepSeek about selection', enabled: true },
+                { label: 'Summarize selection', enabled: true },
+                { label: 'Explain selection', enabled: true },
+                { label: 'Rewrite selection', enabled: true },
+                { label: 'Translate selection', enabled: true },
+                { label: '—', separator: true },
+                { label: 'Open DeepSeek panel', enabled: true },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className={`px-3 py-1.5 text-xs rounded ${
+                    item.separator
+                      ? 'border-t border-gray-700 my-1'
+                      : item.enabled
+                      ? 'hover:bg-purple-500/10 cursor-pointer text-gray-300'
+                      : 'text-gray-600 cursor-not-allowed'
+                  }`}
+                >
+                  {item.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* PermissionManager Service */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Shield size={18} className="text-emerald-400" />
+          PermissionManager Service
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Service Overview</h3>
+              <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+                <code className="text-[10px] text-emerald-300 font-mono block">
+                  apps/desktop/electron/services/PermissionManager.ts
+                </code>
+                <div className="mt-2 text-[10px] text-gray-400">
+                  Stores non-secret site permissions in JSON
+                </div>
+              </div>
+              <div className="mt-3 p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">Storage</div>
+                <code className="text-[11px] text-emerald-300 font-mono">
+                  {'<userData>/permissions.json'}
+                </code>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Methods</h3>
+              <div className="space-y-1.5">
+                {[
+                  { method: 'init()', desc: 'Load from disk' },
+                  { method: 'list()', desc: 'Get all site permissions' },
+                  { method: 'get(origin)', desc: 'Get permissions for site' },
+                  { method: 'set(origin, perms)', desc: 'Update site permissions' },
+                  { method: 'reset(origin)', desc: 'Reset to defaults' },
+                  { method: 'has(origin, perm)', desc: 'Check permission' },
+                ].map(item => (
+                  <div key={item.method} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-emerald-300 font-mono flex-1">{item.method}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Default Permissions</h3>
+            <div className="flex flex-wrap gap-1.5">
+              {['read_page', 'read_selection'].map(perm => (
+                <span key={perm} className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                  {perm}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ProviderConfigManager Service */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Settings size={18} className="text-blue-400" />
+          ProviderConfigManager Service
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Service Overview</h3>
+              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <code className="text-[10px] text-blue-300 font-mono block">
+                  apps/desktop/electron/services/ProviderConfigManager.ts
+                </code>
+                <div className="mt-2 text-[10px] text-gray-400">
+                  Stores non-secret provider config in JSON
+                </div>
+              </div>
+              <div className="mt-3 p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">Storage</div>
+                <code className="text-[11px] text-blue-300 font-mono">
+                  {'<userData>/providers.json'}
+                </code>
+              </div>
+              <div className="mt-2 p-2 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                <div className="text-[10px] text-amber-300">
+                  ⚠ API keys stored in SecretStore, not JSON
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Methods</h3>
+              <div className="space-y-1.5">
+                {[
+                  { method: 'init()', desc: 'Load from disk' },
+                  { method: 'list(auth)', desc: 'Get all providers' },
+                  { method: 'configure(req)', desc: 'Update provider config' },
+                ].map(item => (
+                  <div key={item.method} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-blue-300 font-mono flex-1">{item.method}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Provider Registry</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'deepseek-account', label: 'DeepSeek Account', needsKey: false },
+                { id: 'deepseek-api', label: 'DeepSeek API', needsKey: true },
+                { id: 'custom-openai', label: 'Custom OpenAI', needsKey: true },
+                { id: 'local-model', label: 'Local Model', needsKey: false },
+              ].map(provider => (
+                <div key={provider.id} className="p-2 rounded bg-gray-900/50 border border-gray-700">
+                  <div className="text-[11px] text-blue-300 font-medium">{provider.label}</div>
+                  <div className="text-[9px] text-gray-500 mt-0.5">
+                    {provider.needsKey ? 'Requires API key' : 'No API key needed'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded IPC Channels */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Network size={18} className="text-purple-400" />
+          Expanded IPC Channels
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Browser Events</h3>
+              <div className="space-y-1.5">
+                {[
+                  { channel: 'browser:tab-updated', type: 'event' },
+                  { channel: 'browser:tab-closed', type: 'event' },
+                  { channel: 'browser:context-action', type: 'event' },
+                ].map(item => (
+                  <div key={item.channel} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[10px] text-purple-300 font-mono flex-1">{item.channel}</code>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                      {item.type}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Provider Handlers</h3>
+              <div className="space-y-1.5">
+                {[
+                  { channel: 'providers:list', type: 'invoke' },
+                  { channel: 'providers:getConfig', type: 'invoke' },
+                  { channel: 'providers:configure', type: 'invoke' },
+                  { channel: 'providers:select', type: 'invoke' },
+                ].map(item => (
+                  <div key={item.channel} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[10px] text-purple-300 font-mono flex-1">{item.channel}</code>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      {item.type}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Permission Handlers</h3>
+              <div className="space-y-1.5">
+                {[
+                  { channel: 'permissions:listSites', type: 'invoke' },
+                  { channel: 'permissions:getSite', type: 'invoke' },
+                  { channel: 'permissions:setSite', type: 'invoke' },
+                  { channel: 'permissions:resetSite', type: 'invoke' },
+                ].map(item => (
+                  <div key={item.channel} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[10px] text-purple-300 font-mono flex-1">{item.channel}</code>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      {item.type}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Preload API */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Terminal size={18} className="text-cyan-400" />
+          Expanded Preload API
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Browser API</h3>
+              <div className="space-y-1">
+                {[
+                  'open(url)',
+                  'newTab(url)',
+                  'listTabs()',
+                  'getActiveTab()',
+                  'activateTab(tabId)',
+                  'closeTab(tabId)',
+                  'setBounds(bounds)',
+                  'getPageContext(tabId)',
+                  'onTabUpdated(cb)',
+                  'onTabClosed(cb)',
+                  'onContextAction(cb)',
+                ].map(method => (
+                  <code key={method} className="text-[10px] text-cyan-300 font-mono block">
+                    window.deepseek.browser.{method}
+                  </code>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Permissions API</h3>
+              <div className="space-y-1">
+                {[
+                  'request(permission)',
+                  'listSites()',
+                  'getSite(origin)',
+                  'setSite(origin, perms)',
+                  'resetSite(origin)',
+                ].map(method => (
+                  <code key={method} className="text-[10px] text-cyan-300 font-mono block">
+                    window.deepseek.permissions.{method}
+                  </code>
+                ))}
+              </div>
+              <div className="mt-4">
+                <h3 className="text-xs font-medium text-gray-400 mb-2">Providers API</h3>
+                <div className="space-y-1">
+                  {[
+                    'list()',
+                    'select(providerId)',
+                    'getConfig()',
+                    'configure(request)',
+                  ].map(method => (
+                    <code key={method} className="text-[10px] text-cyan-300 font-mono block">
+                      window.deepseek.providers.{method}
+                    </code>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Renderer Types */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Code size={18} className="text-indigo-400" />
+          Expanded Renderer Types
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Permission Types</h3>
+              <div className="p-3 rounded-lg bg-indigo-500/5 border border-indigo-500/20">
+                <code className="text-[10px] text-indigo-300 font-mono block whitespace-pre-wrap">
+{`type Permission =
+  | 'read_page'
+  | 'read_selection'
+  | 'navigate'
+  | 'click'
+  | 'type'
+  | 'download'
+  | 'upload'
+  | 'clipboard_read'
+  | 'clipboard_write'
+  | 'external_app'
+  | 'file_read'
+  | 'file_write';`}
+                </code>
+              </div>
+              <div className="mt-3 p-2 rounded-lg bg-gray-800/30">
+                <div className="text-[10px] text-gray-500 mb-1">Total: 12 permissions</div>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Provider Config Types</h3>
+              <div className="p-3 rounded-lg bg-indigo-500/5 border border-indigo-500/20">
+                <code className="text-[10px] text-indigo-300 font-mono block whitespace-pre-wrap">
+{`interface ProviderPublicConfig {
+  id: string;
+  label: string;
+  connected: boolean;
+  baseUrl?: string;
+  hasApiKey: boolean;
+  needsApiKey: boolean;
+}
+
+interface ProviderConfigureRequest {
+  id: string;
+  baseUrl?: string;
+  apiKey?: string;
+}`}
+                </code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Store State */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Database size={18} className="text-pink-400" />
+          Expanded Store State
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">New State Properties</h3>
+              <div className="space-y-1.5">
+                {[
+                  { prop: 'tabs', type: 'BrowserTab[]', desc: 'All open tabs' },
+                  { prop: 'activeTabId', type: 'string | null', desc: 'Current active tab' },
+                  { prop: 'sitePermissions', type: 'SitePermission[]', desc: 'Site permissions' },
+                  { prop: 'providerConfigs', type: 'ProviderPublicConfig[]', desc: 'Provider configs' },
+                  { prop: 'settingsLoaded', type: 'boolean', desc: 'Settings loaded flag' },
+                ].map(item => (
+                  <div key={item.prop} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-pink-300 font-mono flex-1">{item.prop}</code>
+                    <code className="text-[10px] text-gray-500 font-mono">{item.type}</code>
+                    <span className="text-[10px] text-gray-600 hidden lg:block">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">New Actions</h3>
+              <div className="space-y-1.5">
+                {[
+                  { action: 'createTab(url)', desc: 'Create new tab' },
+                  { action: 'refreshTabs()', desc: 'Refresh tab list' },
+                  { action: 'activateTab(tabId)', desc: 'Switch to tab' },
+                  { action: 'closeTab(tabId)', desc: 'Close tab' },
+                  { action: 'handleBrowserContextAction()', desc: 'Handle context menu' },
+                  { action: 'loadSettings()', desc: 'Load all settings' },
+                  { action: 'saveSitePermissions()', desc: 'Save permissions' },
+                  { action: 'resetSitePermissions()', desc: 'Reset permissions' },
+                  { action: 'configureProvider()', desc: 'Configure provider' },
+                ].map(item => (
+                  <div key={item.action} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-pink-300 font-mono flex-1">{item.action}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Constants</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <code className="text-[10px] text-pink-300 font-mono block mb-1">ALL_PERMISSIONS</code>
+                <div className="text-[9px] text-gray-500">Array of all 12 permission types</div>
+              </div>
+              <div>
+                <code className="text-[10px] text-pink-300 font-mono block mb-1">PERMISSION_LABELS</code>
+                <div className="text-[9px] text-gray-500">Map of permission → display label</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* TabStrip Component */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Monitor size={18} className="text-cyan-400" />
+          TabStrip Component
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Component Overview</h3>
+              <div className="p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/20">
+                <code className="text-[10px] text-cyan-300 font-mono block">
+                  apps/desktop/renderer/src/components/TabStrip.tsx
+                </code>
+                <div className="mt-2 text-[10px] text-gray-400">
+                  Browser tab management UI with creation, activation, and closing
+                </div>
+              </div>
+              <div className="mt-3 space-y-1.5">
+                <h4 className="text-[10px] text-gray-500 mb-1">Features</h4>
+                {[
+                  'Tab list with active state',
+                  'Tab title/URL display',
+                  'Close button per tab',
+                  'New tab URL input',
+                  'Enter key to create tab',
+                  'Default URL: duckduckgo.com',
+                ].map(feature => (
+                  <div key={feature} className="flex items-center gap-2 text-[11px] text-gray-400">
+                    <div className="w-1 h-1 rounded-full bg-cyan-500" />
+                    {feature}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">UI Preview</h3>
+              <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-700">
+                <div className="flex gap-2 mb-3 overflow-x-auto">
+                  {['Example Domain', 'DeepSeek Chat', 'GitHub'].map((title, i) => (
+                    <div
+                      key={title}
+                      className={`flex-shrink-0 min-w-[140px] max-w-[220px] flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border ${
+                        i === 0
+                          ? 'border-blue-500 bg-blue-500/10'
+                          : 'border-gray-700 bg-gray-900'
+                      }`}
+                    >
+                      <span className="text-[11px] text-gray-300 truncate">{title}</span>
+                      <button className="text-[10px] text-gray-500 hover:text-red-400">×</button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="New tab URL"
+                    className="flex-1 px-2 py-1 text-[11px] bg-gray-900 border border-gray-700 rounded text-gray-400"
+                    readOnly
+                  />
+                  <button className="px-3 py-1 text-[11px] bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded">
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Updated BrowserPanel with TabStrip */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Globe size={18} className="text-blue-400" />
+          Updated BrowserPanel with TabStrip
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Integration Points</h3>
+              <div className="space-y-1.5">
+                {[
+                  { component: 'TabStrip', desc: 'Tab management UI' },
+                  { component: 'URL Toolbar', desc: 'Navigation input' },
+                  { component: 'Browser Viewport', desc: 'BrowserView container' },
+                  { component: 'Side Panel', desc: 'DeepSeek actions' },
+                ].map(item => (
+                  <div key={item.component} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[11px] text-blue-300 font-mono flex-1">{item.component}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Side Panel Actions</h3>
+              <div className="space-y-1.5">
+                {[
+                  { action: 'Ask', icon: '💬', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+                  { action: 'Summarize', icon: '📝', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
+                  { action: 'Explain', icon: '🔍', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
+                  { action: 'Rewrite', icon: '✏️', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+                  { action: 'Translate', icon: '🌐', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+                ].map(item => (
+                  <div key={item.action} className={`flex items-center gap-2 p-2 rounded-lg border ${item.color}`}>
+                    <span className="text-sm">{item.icon}</span>
+                    <span className="text-[11px] font-medium">{item.action}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Viewport Synchronization</h3>
+            <div className="flex items-center gap-2 text-[11px]">
+              <span className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                ResizeObserver
+              </span>
+              <ArrowRight size={12} className="text-gray-600" />
+              <span className="px-2 py-1 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                getBoundingClientRect()
+              </span>
+              <ArrowRight size={12} className="text-gray-600" />
+              <span className="px-2 py-1 rounded bg-green-500/10 text-green-400 border border-green-500/20">
+                setBrowserBounds()
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Full SettingsPanel Implementation */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Settings size={18} className="text-indigo-400" />
+          Full SettingsPanel Implementation
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-3 gap-4 mb-4">
+            <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
+              <h3 className="text-sm font-medium text-blue-300 mb-2">Account Section</h3>
+              <div className="space-y-1.5 text-[11px] text-gray-400">
+                <div className="flex items-center gap-2">
+                  <Key size={10} className="text-blue-400" />
+                  Sign in / Sign out
+                </div>
+                <div className="flex items-center gap-2">
+                  <User size={10} className="text-blue-400" />
+                  Account email display
+                </div>
+                <div className="flex items-center gap-2">
+                  <Shield size={10} className="text-blue-400" />
+                  Authentication status
+                </div>
+              </div>
+            </div>
+            <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20">
+              <h3 className="text-sm font-medium text-purple-300 mb-2">Providers Section</h3>
+              <div className="space-y-1.5 text-[11px] text-gray-400">
+                <div className="flex items-center gap-2">
+                  <Server size={10} className="text-purple-400" />
+                  Provider list (4 providers)
+                </div>
+                <div className="flex items-center gap-2">
+                  <Key size={10} className="text-purple-400" />
+                  API key configuration
+                </div>
+                <div className="flex items-center gap-2">
+                  <Globe size={10} className="text-purple-400" />
+                  Base URL configuration
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle size={10} className="text-purple-400" />
+                  Connection status
+                </div>
+              </div>
+            </div>
+            <div className="p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+              <h3 className="text-sm font-medium text-emerald-300 mb-2">Permissions Section</h3>
+              <div className="space-y-1.5 text-[11px] text-gray-400">
+                <div className="flex items-center gap-2">
+                  <Shield size={10} className="text-emerald-400" />
+                  Site permission matrix
+                </div>
+                <div className="flex items-center gap-2">
+                  <Plus size={10} className="text-emerald-400" />
+                  Add new site
+                </div>
+                <div className="flex items-center gap-2">
+                  <RefreshCw size={10} className="text-emerald-400" />
+                  Reset permissions
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckSquare size={10} className="text-emerald-400" />
+                  12 permission checkboxes
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Navigation Structure</h3>
+            <div className="flex gap-2">
+              {['Account', 'Providers', 'Permissions'].map((section, i) => (
+                <button
+                  key={section}
+                  className={`px-3 py-1.5 text-[11px] rounded-lg border ${
+                    i === 0
+                      ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                      : 'bg-gray-800 text-gray-400 border-gray-700'
+                  }`}
+                >
+                  {section}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Provider Configuration UI */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Server size={18} className="text-purple-400" />
+          Provider Configuration UI
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">DeepSeek Account Provider</h3>
+              <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <div className="flex items-center justify-between mb-2">
+                  <strong className="text-[11px] text-blue-300">DeepSeek Account</strong>
+                  <span className="text-[10px] text-green-400">Connected</span>
+                </div>
+                <button className="w-full px-3 py-1.5 text-[11px] bg-red-500/20 text-red-300 border border-red-500/30 rounded">
+                  Sign out
+                </button>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">DeepSeek API Provider</h3>
+              <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20">
+                <div className="flex items-center justify-between mb-3">
+                  <strong className="text-[11px] text-purple-300">DeepSeek API</strong>
+                  <span className="text-[10px] text-amber-400">Configured</span>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[10px] text-gray-500 block mb-1">Base URL</label>
+                    <input
+                      type="text"
+                      value="https://api.deepseek.com/v1"
+                      readOnly
+                      className="w-full px-2 py-1 text-[11px] bg-gray-900 border border-gray-700 rounded text-gray-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-gray-500 block mb-1">API key</label>
+                    <input
+                      type="password"
+                      placeholder="Stored. Enter a new value to replace it."
+                      readOnly
+                      className="w-full px-2 py-1 text-[11px] bg-gray-900 border border-gray-700 rounded text-gray-400"
+                    />
+                  </div>
+                  <button className="w-full px-3 py-1.5 text-[11px] bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded">
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Provider Types</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'deepseek-account', label: 'Account', needsKey: false, color: 'text-blue-400' },
+                { id: 'deepseek-api', label: 'API', needsKey: true, color: 'text-purple-400' },
+                { id: 'custom-openai', label: 'Custom', needsKey: true, color: 'text-amber-400' },
+                { id: 'local-model', label: 'Local', needsKey: false, color: 'text-emerald-400' },
+              ].map(provider => (
+                <div key={provider.id} className="p-2 rounded bg-gray-900/50 border border-gray-700">
+                  <div className={`text-[11px] font-medium ${provider.color}`}>{provider.label}</div>
+                  <div className="text-[9px] text-gray-500 mt-0.5">
+                    {provider.needsKey ? 'Requires API key' : 'No API key needed'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Permission Matrix UI */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Shield size={18} className="text-emerald-400" />
+          Permission Matrix UI
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="mb-4">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Add Site</h3>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="example.com"
+                className="flex-1 px-2 py-1 text-[11px] bg-gray-900 border border-gray-700 rounded text-gray-400"
+                readOnly
+              />
+              <button className="px-3 py-1 text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded">
+                Add site
+              </button>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-700">
+            <div className="flex items-center justify-between mb-3">
+              <strong className="text-[11px] text-emerald-300">example.com</strong>
+              <button className="px-2 py-0.5 text-[10px] bg-red-500/20 text-red-300 border border-red-500/30 rounded">
+                Reset
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { perm: 'read_page', label: 'Read page', checked: true },
+                { perm: 'read_selection', label: 'Read selection', checked: true },
+                { perm: 'navigate', label: 'Navigate', checked: false },
+                { perm: 'click', label: 'Click', checked: false },
+                { perm: 'type', label: 'Type', checked: false },
+                { perm: 'download', label: 'Download', checked: false },
+                { perm: 'upload', label: 'Upload', checked: false },
+                { perm: 'clipboard_read', label: 'Clipboard read', checked: false },
+                { perm: 'clipboard_write', label: 'Clipboard write', checked: false },
+                { perm: 'external_app', label: 'External app', checked: false },
+                { perm: 'file_read', label: 'File read', checked: false },
+                { perm: 'file_write', label: 'File write', checked: false },
+              ].map(item => (
+                <label key={item.perm} className="flex items-center gap-2 text-[11px] text-gray-400">
+                  <input
+                    type="checkbox"
+                    checked={item.checked}
+                    readOnly
+                    className="w-3 h-3 rounded"
+                  />
+                  {item.label}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Permission Labels Map</h3>
+            <code className="text-[10px] text-emerald-300 font-mono block">
+              PERMISSION_LABELS: Record&lt;Permission, string&gt;
+            </code>
+            <div className="text-[9px] text-gray-500 mt-1">
+              Maps permission keys to human-readable labels for UI display
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Debian Packaging Setup */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Package size={18} className="text-orange-400" />
+          Debian Packaging Setup
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Electron Builder Config</h3>
+              <div className="p-3 rounded-lg bg-orange-500/5 border border-orange-500/20">
+                <code className="text-[10px] text-orange-300 font-mono block whitespace-pre-wrap">
+{`# electron-builder.yml
+appId: com.deepseek.desktop
+productName: DeepSeek Desktop
+executableName: deepseek-desktop
+
+directories:
+  buildResources: packaging
+  output: release
+
+files:
+  - dist/electron/**/*
+  - renderer/dist/**/*
+  - package.json
+  - node_modules/**/*
+
+asarUnpack:
+  - "**/*.node"
+
+linux:
+  category: Development;Utility;
+  maintainer: DeepSeek Maintainers
+  target:
+    - target: deb
+      arch:
+        - x64
+        - arm64
+
+deb:
+  packageName: deepseek-desktop
+  priority: optional
+  compression: xz
+  depends:
+    - libnss3
+    - libatk-bridge2.0-0
+    - libgtk-3-0
+    - libgbm1
+    - libxss1
+    - libasound2
+    - libsecret-1-0`}
+                </code>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Build Scripts</h3>
+              <div className="space-y-2">
+                <div className="p-2 rounded-lg bg-gray-800/30">
+                  <code className="text-[10px] text-orange-300 font-mono block">
+                    scripts/build-deb.sh
+                  </code>
+                  <div className="text-[9px] text-gray-500 mt-1">
+                    Main build script for .deb packages
+                  </div>
+                </div>
+                <div className="p-2 rounded-lg bg-gray-800/30">
+                  <code className="text-[10px] text-orange-300 font-mono block">
+                    scripts/build-main.mjs
+                  </code>
+                  <div className="text-[9px] text-gray-500 mt-1">
+                    esbuild script for main/preload bundling
+                  </div>
+                </div>
+                <div className="p-2 rounded-lg bg-gray-800/30">
+                  <code className="text-[10px] text-orange-300 font-mono block">
+                    .npmrc
+                  </code>
+                  <div className="text-[9px] text-gray-500 mt-1">
+                    node-linker=hoisted for pnpm compatibility
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Package Structure</h3>
+              <div className="space-y-1.5">
+                {[
+                  { path: '/opt/deepseek-desktop/', desc: 'Application files' },
+                  { path: '/usr/bin/deepseek-desktop', desc: 'Executable symlink' },
+                  { path: '/usr/share/applications/', desc: 'Desktop entry' },
+                  { path: '/usr/share/icons/hicolor/', desc: 'Application icons' },
+                  { path: '/usr/share/metainfo/', desc: 'AppStream metadata' },
+                ].map(item => (
+                  <div key={item.path} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[10px] text-orange-300 font-mono flex-1">{item.path}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Build Commands</h3>
+              <div className="space-y-2">
+                <div className="p-2 rounded-lg bg-gray-800/30">
+                  <code className="text-[10px] text-orange-300 font-mono block">
+                    ./scripts/build-deb.sh
+                  </code>
+                  <div className="text-[9px] text-gray-500 mt-1">
+                    Build both x64 and arm64 .deb packages
+                  </div>
+                </div>
+                <div className="p-2 rounded-lg bg-gray-800/30">
+                  <code className="text-[10px] text-orange-300 font-mono block">
+                    pnpm dist:deb
+                  </code>
+                  <div className="text-[9px] text-gray-500 mt-1">
+                    Alternative: electron-builder command
+                  </div>
+                </div>
+                <div className="p-2 rounded-lg bg-gray-800/30">
+                  <code className="text-[10px] text-orange-300 font-mono block">
+                    sudo apt install *.deb
+                  </code>
+                  <div className="text-[9px] text-gray-500 mt-1">
+                    Install the generated package
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Packaging Assets</h3>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="p-2 rounded bg-gray-900/50 border border-gray-700">
+                <div className="text-[10px] text-orange-300 font-mono">icons/512x512.png</div>
+                <div className="text-[9px] text-gray-500 mt-0.5">Application icon</div>
+              </div>
+              <div className="p-2 rounded bg-gray-900/50 border border-gray-700">
+                <div className="text-[10px] text-orange-300 font-mono">*.desktop</div>
+                <div className="text-[9px] text-gray-500 mt-0.5">Desktop entry file</div>
+              </div>
+              <div className="p-2 rounded bg-gray-900/50 border border-gray-700">
+                <div className="text-[10px] text-orange-300 font-mono">*.metainfo.xml</div>
+                <div className="text-[9px] text-gray-500 mt-0.5">AppStream metadata</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Build Output */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Folder size={18} className="text-amber-400" />
+          Build Output
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/20 mb-4">
+            <code className="text-[10px] text-amber-300 font-mono block">
+              apps/desktop/release/
+            </code>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Generated Packages</h3>
+              <div className="space-y-1.5">
+                {[
+                  { file: 'deepseek-desktop_0.1.0_amd64.deb', arch: 'x64' },
+                  { file: 'deepseek-desktop_0.1.0_arm64.deb', arch: 'arm64' },
+                ].map(pkg => (
+                  <div key={pkg.file} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[10px] text-amber-300 font-mono flex-1">{pkg.file}</code>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                      {pkg.arch}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Installation</h3>
+              <div className="space-y-2">
+                <div className="p-2 rounded-lg bg-gray-800/30">
+                  <code className="text-[10px] text-amber-300 font-mono block">
+                    sudo apt install *.deb
+                  </code>
+                </div>
+                <div className="p-2 rounded-lg bg-gray-800/30">
+                  <code className="text-[10px] text-amber-300 font-mono block">
+                    deepseek-desktop
+                  </code>
+                  <div className="text-[9px] text-gray-500 mt-1">Launch the application</div>
                 </div>
               </div>
             </div>

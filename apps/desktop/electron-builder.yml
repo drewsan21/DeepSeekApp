@@ -1,0 +1,45 @@
+appId: com.deepseek.desktop
+productName: DeepSeek Desktop
+executableName: deepseek-desktop
+
+directories:
+  buildResources: packaging
+  output: release
+
+files:
+  - dist/electron/**/*
+  - renderer/dist/**/*
+  - package.json
+  - node_modules/**/*
+
+asarUnpack:
+  - "**/*.node"
+
+extraResources:
+  - from: packaging/metainfo/deepseek-desktop.metainfo.xml
+    to: deepseek-desktop.metainfo.xml
+
+linux:
+  category: Development;Utility;
+  maintainer: DeepSeek Maintainers <maintainer@example.com>
+  synopsis: DeepSeek Harness and browser workspace
+  description: DeepSeek Desktop combines the DeepSeek Harness, account authentication, provider integration, and browser tooling.
+  icon: packaging/icons
+  target:
+    - target: deb
+      arch:
+        - x64
+        - arm64
+
+deb:
+  packageName: deepseek-desktop
+  priority: optional
+  compression: xz
+  depends:
+    - libnss3
+    - libatk-bridge2.0-0
+    - libgtk-3-0
+    - libgbm1
+    - libxss1
+    - libasound2
+    - libsecret-1-0

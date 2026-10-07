@@ -21,7 +21,16 @@ import {
   Shield,
   Zap,
   Settings,
-  AlertTriangle
+  AlertTriangle,
+  Lock,
+  Download,
+  Key,
+  Server,
+  Cpu,
+  User,
+  LogOut,
+  RefreshCw,
+  Package
 } from 'lucide-react'
 
 interface Feature {
@@ -670,6 +679,190 @@ export default function FeatureMatrix() {
                     Deny
                   </span>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Settings Screens */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Settings size={18} className="text-indigo-400" />
+          Settings Screens
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-3 gap-4 mb-4">
+            <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
+              <h3 className="text-sm font-medium text-blue-300 mb-2">Permissions Settings</h3>
+              <ul className="space-y-1.5 text-[11px] text-gray-400">
+                <li className="flex items-center gap-2">
+                  <Shield size={10} className="text-blue-400" />
+                  Site permissions management
+                </li>
+                <li className="flex items-center gap-2">
+                  <Lock size={10} className="text-blue-400" />
+                  Clipboard access controls
+                </li>
+                <li className="flex items-center gap-2">
+                  <Download size={10} className="text-blue-400" />
+                  Download approval settings
+                </li>
+                <li className="flex items-center gap-2">
+                  <Globe size={10} className="text-blue-400" />
+                  Browser action permissions
+                </li>
+              </ul>
+            </div>
+            <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20">
+              <h3 className="text-sm font-medium text-purple-300 mb-2">Provider Settings</h3>
+              <ul className="space-y-1.5 text-[11px] text-gray-400">
+                <li className="flex items-center gap-2">
+                  <Key size={10} className="text-purple-400" />
+                  API key configuration
+                </li>
+                <li className="flex items-center gap-2">
+                  <Server size={10} className="text-purple-400" />
+                  Custom endpoint URLs
+                </li>
+                <li className="flex items-center gap-2">
+                  <Cpu size={10} className="text-purple-400" />
+                  Model selection defaults
+                </li>
+                <li className="flex items-center gap-2">
+                  <Zap size={10} className="text-purple-400" />
+                  Provider-specific options
+                </li>
+              </ul>
+            </div>
+            <div className="p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+              <h3 className="text-sm font-medium text-emerald-300 mb-2">Account Settings</h3>
+              <ul className="space-y-1.5 text-[11px] text-gray-400">
+                <li className="flex items-center gap-2">
+                  <User size={10} className="text-emerald-400" />
+                  Account information
+                </li>
+                <li className="flex items-center gap-2">
+                  <LogOut size={10} className="text-emerald-400" />
+                  Sign out / switch account
+                </li>
+                <li className="flex items-center gap-2">
+                  <RefreshCw size={10} className="text-emerald-400" />
+                  Session refresh
+                </li>
+                <li className="flex items-center gap-2">
+                  <Shield size={10} className="text-emerald-400" />
+                  Security settings
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <h3 className="text-xs font-medium text-gray-400 mb-2">Settings State Management</h3>
+            <div className="grid md:grid-cols-2 gap-3">
+              <div>
+                <div className="text-[10px] text-gray-500 mb-1">Permissions Store</div>
+                <code className="text-[11px] text-blue-300 font-mono block">
+                  usePermissionsStore()
+                </code>
+              </div>
+              <div>
+                <div className="text-[10px] text-gray-500 mb-1">Provider Store</div>
+                <code className="text-[11px] text-purple-300 font-mono block">
+                  useProviderStore()
+                </code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Debian Packaging */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Package size={18} className="text-orange-400" />
+          Debian Packaging Setup
+        </h2>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Electron Builder Config</h3>
+              <div className="p-3 rounded-lg bg-orange-500/5 border border-orange-500/20">
+                <code className="text-[10px] text-orange-300 font-mono block whitespace-pre-wrap">
+{`// electron-builder.yml
+appId: com.deepseek.desktop
+productName: DeepSeek Desktop
+directories:
+  output: dist
+  buildResources: build
+files:
+  - "**/*"
+  - "!**/*.ts"
+  - "!**/*.tsx"
+  - "!node_modules/**/*"
+linux:
+  target:
+    - deb
+    - AppImage
+  category: Development
+  maintainer: DeepSeek Team
+deb:
+  priority: optional
+  depends:
+    - libnss3
+    - libatk-bridge2.0-0
+    - libgtk-3-0
+    - libgbm1
+    - libasound2`}
+                </code>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Package Structure</h3>
+              <div className="space-y-1.5">
+                {[
+                  { path: '/opt/deepseek-desktop/', desc: 'Application files' },
+                  { path: '/usr/bin/deepseek-desktop', desc: 'Executable symlink' },
+                  { path: '/usr/share/applications/', desc: 'Desktop entry' },
+                  { path: '/usr/share/icons/hicolor/', desc: 'Application icons' },
+                  { path: '/usr/share/doc/', desc: 'Documentation' },
+                ].map(item => (
+                  <div key={item.path} className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/30">
+                    <code className="text-[10px] text-orange-300 font-mono flex-1">{item.path}</code>
+                    <span className="text-[10px] text-gray-500">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Build Commands</h3>
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <code className="text-[10px] text-orange-300 font-mono">npm run build:linux</code>
+                  <span className="text-[10px] text-gray-500">→ .deb + AppImage</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="text-[10px] text-orange-300 font-mono">npm run build:deb</code>
+                  <span className="text-[10px] text-gray-500">→ .deb only</span>
+                </div>
+              </div>
+            </div>
+            <div className="p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+              <h3 className="text-xs font-medium text-gray-400 mb-2">Dependencies</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  'libnss3',
+                  'libatk-bridge2.0-0',
+                  'libgtk-3-0',
+                  'libgbm1',
+                  'libasound2',
+                ].map(dep => (
+                  <span key={dep} className="text-[10px] px-2 py-0.5 rounded bg-orange-500/10 text-orange-300 border border-orange-500/20">
+                    {dep}
+                  </span>
+                ))}
               </div>
             </div>
           </div>

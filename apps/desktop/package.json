@@ -1,0 +1,25 @@
+{
+  "name": "@deepseek/desktop",
+  "version": "0.1.0",
+  "main": "dist/electron/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "build:electron": "node scripts/build-main.mjs",
+    "build:renderer": "pnpm -F @deepseek/renderer build",
+    "build": "pnpm build:renderer && pnpm build:electron",
+    "dist:deb": "pnpm build && electron-builder --config electron-builder.yml --linux deb --x64 --arm64"
+  },
+  "dependencies": {
+    "@deepseek/shared": "workspace:*",
+    "@deepseek/secrets": "workspace:*",
+    "@deepseek/auth": "workspace:*",
+    "@deepseek/harness": "workspace:*",
+    "@deepseek/browser": "workspace:*"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3",
+    "esbuild": "^0.21.5",
+    "typescript": "^5.4.0"
+  }
+}
