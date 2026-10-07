@@ -20,7 +20,7 @@ import {
 const phases = [
   {
     id: 1,
-    title: 'Foundation & Architecture',
+    title: 'Foundation & Extended Types',
     status: 'complete',
     progress: 100,
     icon: <Package size={18} />,
@@ -31,6 +31,10 @@ const phases = [
       { name: 'Security architecture design', done: true },
       { name: 'IPC channel design', done: true },
       { name: 'Component architecture', done: true },
+      { name: 'Extended types (Qwen, MCP, GitHub, Tools)', done: true },
+      { name: 'Provider registry (6 providers, 11 models)', done: true },
+      { name: 'MCP server defaults (5 servers)', done: true },
+      { name: 'Skill registry (20 skills)', done: true },
     ]
   },
   {
