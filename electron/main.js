@@ -3,10 +3,20 @@ const path = require('path');
 const { registerIpcHandlers } = require('./ipc-handlers');
 const { BrowserEngine } = require('./services/BrowserEngine');
 const { ToolExecutor } = require('./services/ToolExecutor');
+const { DatabaseManager } = require('./services/DatabaseManager');
+const { SecretStore } = require('./services/SecretStore');
+const { SettingsManager } = require('./services/SettingsManager');
+const { ConversationManager } = require('./services/ConversationManager');
+const { WorkspaceManager } = require('./services/WorkspaceManager');
 
 let mainWindow;
 let browserEngine;
 let toolExecutor;
+let databaseManager;
+let secretStore;
+let settingsManager;
+let conversationManager;
+let workspaceManager;
 
 function createWindow() {
   // Create the browser window.
@@ -20,12 +30,28 @@ function createWindow() {
     },
   });
 
+  // Initialize storage managers
+  const userDataPath = app.getPath('userData');
+  databaseManager = new DatabaseManager(userDataPath);
+  secretStore = new SecretStore();
+  settingsManager = new SettingsManager();
+  conversationManager = new ConversationManager(databaseManager);
+  workspaceManager = new WorkspaceManager(databaseManager);
+
   // Initialize real services
   browserEngine = new BrowserEngine(mainWindow);
   toolExecutor = new ToolExecutor();
 
-  // Register IPC handlers
-  registerIpcHandlers(mainWindow, browserEngine, toolExecutor);
+  // Register IPC handlers with all managers
+  registerIpcHandlers(mainWindow, {
+    browserEngine,
+    toolExecutor,
+    databaseManager,
+    secretStore,
+    settingsManager,
+    conversationManager,
+    workspaceManager
+  });
 
   // Load the app
   if (process.env.NODE_ENV === 'development') {

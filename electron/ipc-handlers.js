@@ -19,7 +19,9 @@ let providerConfigs = [
   { id: 'local-model', label: 'Local Model', connected: false, baseUrl: null },
 ];
 
-function registerIpcHandlers(mainWindow, browserEngine, toolExecutor) {
+function registerIpcHandlers(mainWindow, managers) {
+  const { browserEngine, toolExecutor, databaseManager, secretStore, settingsManager, conversationManager, workspaceManager } = managers;
+
   // Helper to send events to renderer
   const sendToRenderer = (channel, data) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
@@ -335,6 +337,254 @@ function registerIpcHandlers(mainWindow, browserEngine, toolExecutor) {
   ipcMain.handle('permissions:request', async (event, permission) => {
     // In production, would show permission dialog
     return false;
+  });
+
+  // ============================================================================
+  // Conversation handlers - REAL PERSISTENT STORAGE
+  // ============================================================================
+
+  ipcMain.handle('conversation:create', async (event, title, providerId, model, metadata) => {
+    return conversationManager.createConversation(title, providerId, model, metadata);
+  });
+
+  ipcMain.handle('conversation:get', async (event, id) => {
+    return conversationManager.getConversation(id);
+  });
+
+  ipcMain.handle('conversation:getAll', async () => {
+    return conversationManager.getAllConversations();
+  });
+
+  ipcMain.handle('conversation:getWithMessages', async (event, id) => {
+    return conversationManager.getConversationWithMessages(id);
+  });
+
+  ipcMain.handle('conversation:updateTitle', async (event, id, title) => {
+    conversationManager.updateTitle(id, title);
+    return true;
+  });
+
+  ipcMain.handle('conversation:delete', async (event, id) => {
+    conversationManager.deleteConversation(id);
+    return true;
+  });
+
+  ipcMain.handle('conversation:addMessage', async (event, conversationId, role, content, metadata) => {
+    return conversationManager.addMessage(conversationId, role, content, metadata);
+  });
+
+  ipcMain.handle('conversation:getMessages', async (event, conversationId) => {
+    return conversationManager.getMessages(conversationId);
+  });
+
+  ipcMain.handle('conversation:search', async (event, query) => {
+    return conversationManager.searchConversations(query);
+  });
+
+  ipcMain.handle('conversation:getRecent', async (event, limit) => {
+    return conversationManager.getRecentConversations(limit);
+  });
+
+  ipcMain.handle('conversation:getStats', async () => {
+    return conversationManager.getStats();
+  });
+
+  ipcMain.handle('conversation:export', async (event, id) => {
+    return conversationManager.exportConversation(id);
+  });
+
+  ipcMain.handle('conversation:import', async (event, data) => {
+    return conversationManager.importConversation(data);
+  });
+
+  ipcMain.handle('conversation:duplicate', async (event, id) => {
+    return conversationManager.duplicateConversation(id);
+  });
+
+  // ============================================================================
+  // Workspace handlers - REAL PERSISTENT STORAGE
+  // ============================================================================
+
+  ipcMain.handle('workspace:create', async (event, name, description, config) => {
+    return workspaceManager.createWorkspace(name, description, config);
+  });
+
+  ipcMain.handle('workspace:get', async (event, id) => {
+    return workspaceManager.getWorkspace(id);
+  });
+
+  ipcMain.handle('workspace:getAll', async () => {
+    return workspaceManager.getAllWorkspaces();
+  });
+
+  ipcMain.handle('workspace:getActive', async () => {
+    return workspaceManager.getActiveWorkspace();
+  });
+
+  ipcMain.handle('workspace:setActive', async (event, id) => {
+    workspaceManager.setActiveWorkspace(id);
+    return true;
+  });
+
+  ipcMain.handle('workspace:update', async (event, id, updates) => {
+    workspaceManager.updateWorkspace(id, updates);
+    return true;
+  });
+
+  ipcMain.handle('workspace:delete', async (event, id) => {
+    workspaceManager.deleteWorkspace(id);
+    return true;
+  });
+
+  ipcMain.handle('workspace:search', async (event, query) => {
+    return workspaceManager.searchWorkspaces(query);
+  });
+
+  ipcMain.handle('workspace:getStats', async () => {
+    return workspaceManager.getStats();
+  });
+
+  ipcMain.handle('workspace:export', async (event, id) => {
+    return workspaceManager.exportWorkspace(id);
+  });
+
+  ipcMain.handle('workspace:import', async (event, data) => {
+    return workspaceManager.importWorkspace(data);
+  });
+
+  ipcMain.handle('workspace:duplicate', async (event, id) => {
+    return workspaceManager.duplicateWorkspace(id);
+  });
+
+  // ============================================================================
+  // Settings handlers - REAL PERSISTENT STORAGE
+  // ============================================================================
+
+  ipcMain.handle('settings:get', async (event, key, defaultValue) => {
+    return settingsManager.get(key, defaultValue);
+  });
+
+  ipcMain.handle('settings:set', async (event, key, value) => {
+    settingsManager.set(key, value);
+    return true;
+  });
+
+  ipcMain.handle('settings:getAll', async () => {
+    return settingsManager.getAll();
+  });
+
+  ipcMain.handle('settings:reset', async () => {
+    settingsManager.reset();
+    return true;
+  });
+
+  ipcMain.handle('settings:getTheme', async () => {
+    return settingsManager.getTheme();
+  });
+
+  ipcMain.handle('settings:setTheme', async (event, theme) => {
+    settingsManager.setTheme(theme);
+    return true;
+  });
+
+  ipcMain.handle('settings:getDefaultProvider', async () => {
+    return settingsManager.getDefaultProvider();
+  });
+
+  ipcMain.handle('settings:setDefaultProvider', async (event, provider) => {
+    settingsManager.setDefaultProvider(provider);
+    return true;
+  });
+
+  ipcMain.handle('settings:isToolEnabled', async (event, toolName) => {
+    return settingsManager.isToolEnabled(toolName);
+  });
+
+  ipcMain.handle('settings:setToolEnabled', async (event, toolName, enabled) => {
+    settingsManager.setToolEnabled(toolName, enabled);
+    return true;
+  });
+
+  ipcMain.handle('settings:getEnabledTools', async () => {
+    return settingsManager.getEnabledTools();
+  });
+
+  ipcMain.handle('settings:getUISettings', async () => {
+    return settingsManager.getUISettings();
+  });
+
+  ipcMain.handle('settings:setUISettings', async (event, settings) => {
+    settingsManager.setUISettings(settings);
+    return true;
+  });
+
+  ipcMain.handle('settings:export', async () => {
+    return settingsManager.exportSettings();
+  });
+
+  ipcMain.handle('settings:import', async (event, settingsJson) => {
+    return settingsManager.importSettings(settingsJson);
+  });
+
+  // ============================================================================
+  // Secret handlers - REAL SECURE STORAGE
+  // ============================================================================
+
+  ipcMain.handle('secret:set', async (event, key, value) => {
+    return await secretStore.set(key, value);
+  });
+
+  ipcMain.handle('secret:get', async (event, key) => {
+    return await secretStore.get(key);
+  });
+
+  ipcMain.handle('secret:delete', async (event, key) => {
+    return await secretStore.delete(key);
+  });
+
+  ipcMain.handle('secret:has', async (event, key) => {
+    return await secretStore.has(key);
+  });
+
+  ipcMain.handle('secret:setApiKey', async (event, providerId, apiKey) => {
+    return await secretStore.setApiKey(providerId, apiKey);
+  });
+
+  ipcMain.handle('secret:getApiKey', async (event, providerId) => {
+    return await secretStore.getApiKey(providerId);
+  });
+
+  ipcMain.handle('secret:deleteApiKey', async (event, providerId) => {
+    return await secretStore.deleteApiKey(providerId);
+  });
+
+  ipcMain.handle('secret:setOAuthToken', async (event, provider, token) => {
+    return await secretStore.setOAuthToken(provider, token);
+  });
+
+  ipcMain.handle('secret:getOAuthToken', async (event, provider) => {
+    return await secretStore.getOAuthToken(provider);
+  });
+
+  ipcMain.handle('secret:deleteOAuthToken', async (event, provider) => {
+    return await secretStore.deleteOAuthToken(provider);
+  });
+
+  ipcMain.handle('secret:clearAll', async () => {
+    return await secretStore.clearAll();
+  });
+
+  // ============================================================================
+  // Database handlers
+  // ============================================================================
+
+  ipcMain.handle('database:getStats', async () => {
+    return databaseManager.getStats();
+  });
+
+  ipcMain.handle('database:vacuum', async () => {
+    databaseManager.vacuum();
+    return true;
   });
 }
 
