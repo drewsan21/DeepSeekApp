@@ -1,5 +1,5 @@
 // ============================================================================
-// Memory Leak Detector - Track and identify memory leaks
+// Memory Leak Detector - Track and detect memory leaks
 // ============================================================================
 
 export interface MemorySnapshot {
@@ -11,180 +11,128 @@ export interface MemorySnapshot {
   arrayBuffers: number;
 }
 
-export interface MemoryLeakWarning {
-  type: 'growth' | 'threshold' | 'pattern';
-  message: string;
-  severity: 'warning' | 'critical';
+export interface MemoryLeakReport {
+  hasLeak: boolean;
+  growthRate: number; // bytes per second
+  duration: number; // seconds
   snapshots: MemorySnapshot[];
+  recommendation: string;
 }
 
 export class MemoryLeakDetector {
   private snapshots: MemorySnapshot[] = [];
-  private warnings: MemoryLeakWarning[] = [];
   private interval: NodeJS.Timeout | null = null;
-  private maxSnapshots = 100;
-  private growthThreshold = 1.2; // 20% growth threshold
-  private absoluteThreshold = 500 * 1024 * 1024; // 500MB
+  private readonly THRESHOLD_GROWTH_RATE = 1024 * 1024; // 1MB per second
+  private readonly MIN_DURATION = 60; // 60 seconds minimum
 
   constructor() {}
 
-  start(intervalMs: number = 5000) {
-    this.takeSnapshot();
-    
+  start(intervalMs: number = 1000) {
+    this.snapshots = [];
     this.interval = setInterval(() => {
       this.takeSnapshot();
-      this.analyzeForLeaks();
     }, intervalMs);
   }
 
-  stop() {
+  stop(): MemoryLeakReport {
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;
     }
+
+    return this.analyze();
   }
 
-  takeSnapshot(): MemorySnapshot {
-    const mem = process.memoryUsage();
-    const snapshot: MemorySnapshot = {
-      timestamp: Date.now(),
-      heapUsed: mem.heapUsed,
-      heapTotal: mem.heapTotal,
-      external: mem.external,
-      rss: mem.rss,
-      arrayBuffers: mem.arrayBuffers,
-    };
-
-    this.snapshots.push(snapshot);
-
-    // Keep only recent snapshots
-    if (this.snapshots.length > this.maxSnapshots) {
-      this.snapshots.shift();
+  takeSnapshot() {
+    if (typeof process !== 'undefined' && process.memoryUsage) {
+      const mem = process.memoryUsage();
+      this.snapshots.push({
+        timestamp: Date.now(),
+        heapUsed: mem.heapUsed,
+        heapTotal: mem.heapTotal,
+        external: mem.external,
+        rss: mem.rss,
+        arrayBuffers: mem.arrayBuffers,
+      });
     }
-
-    return snapshot;
   }
 
-  private analyzeForLeaks() {
-    if (this.snapshots.length < 10) return; // Need enough data
-
-    const recent = this.snapshots.slice(-10);
-    const oldest = recent[0];
-    const newest = recent[recent.length - 1];
-
-    // Check for continuous growth
-    const growth = newest.heapUsed / oldest.heapUsed;
-    if (growth > this.growthThreshold) {
-      this.addWarning({
-        type: 'growth',
-        message: `Memory grew by ${((growth - 1) * 100).toFixed(2)}% in recent snapshots`,
-        severity: 'warning',
-        snapshots: recent,
-      });
+  analyze(): MemoryLeakReport {
+    if (this.snapshots.length < 2) {
+      return {
+        hasLeak: false,
+        growthRate: 0,
+        duration: 0,
+        snapshots: this.snapshots,
+        recommendation: 'Not enough data to analyze',
+      };
     }
 
-    // Check absolute threshold
-    if (newest.heapUsed > this.absoluteThreshold) {
-      this.addWarning({
-        type: 'threshold',
-        message: `Memory usage exceeded ${this.absoluteThreshold / 1024 / 1024}MB`,
-        severity: 'critical',
-        snapshots: recent,
-      });
+    const first = this.snapshots[0];
+    const last = this.snapshots[this.snapshots.length - 1];
+    const duration = (last.timestamp - first.timestamp) / 1000;
+
+    if (duration < this.MIN_DURATION) {
+      return {
+        hasLeak: false,
+        growthRate: 0,
+        duration,
+        snapshots: this.snapshots,
+        recommendation: `Test duration too short (${duration}s). Need at least ${this.MIN_DURATION}s.`,
+      };
     }
 
-    // Check for patterns (e.g., consistent increase)
-    let increasing = 0;
-    for (let i = 1; i < recent.length; i++) {
-      if (recent[i].heapUsed > recent[i - 1].heapUsed) {
-        increasing++;
+    const heapGrowth = last.heapUsed - first.heapUsed;
+    const growthRate = heapGrowth / duration;
+
+    const hasLeak = growthRate > this.THRESHOLD_GROWTH_RATE;
+
+    let recommendation = 'No memory leak detected';
+    if (hasLeak) {
+      recommendation = `Memory leak detected! Growing at ${(growthRate / 1024 / 1024).toFixed(2)} MB/s`;
+      
+      // Check for common patterns
+      if (last.arrayBuffers > first.arrayBuffers * 1.5) {
+        recommendation += '\n- ArrayBuffer growth detected. Check for unclosed streams or buffers.';
+      }
+      if (last.external > first.external * 1.5) {
+        recommendation += '\n- External memory growth detected. Check for native resources.';
       }
     }
 
-    if (increasing >= recent.length * 0.8) {
-      this.addWarning({
-        type: 'pattern',
-        message: 'Consistent memory growth pattern detected',
-        severity: 'warning',
-        snapshots: recent,
-      });
-    }
-  }
-
-  private addWarning(warning: MemoryLeakWarning) {
-    // Avoid duplicate warnings
-    const exists = this.warnings.some(
-      w => w.type === warning.type && w.message === warning.message
-    );
-
-    if (!exists) {
-      this.warnings.push(warning);
-      console.warn(`[MemoryLeakDetector] ${warning.severity.toUpperCase()}: ${warning.message}`);
-    }
+    return {
+      hasLeak,
+      growthRate,
+      duration,
+      snapshots: this.snapshots,
+      recommendation,
+    };
   }
 
   getSnapshots(): MemorySnapshot[] {
     return [...this.snapshots];
   }
 
-  getWarnings(): MemoryLeakWarning[] {
-    return [...this.warnings];
-  }
-
-  getLatestSnapshot(): MemorySnapshot | null {
-    return this.snapshots.length > 0 ? this.snapshots[this.snapshots.length - 1] : null;
-  }
-
-  getMemoryTrend(): {
-    direction: 'increasing' | 'decreasing' | 'stable';
-    percentage: number;
-  } {
-    if (this.snapshots.length < 2) {
-      return { direction: 'stable', percentage: 0 };
-    }
-
-    const first = this.snapshots[0].heapUsed;
-    const last = this.snapshots[this.snapshots.length - 1].heapUsed;
-    const change = ((last - first) / first) * 100;
-
-    let direction: 'increasing' | 'decreasing' | 'stable';
-    if (change > 5) direction = 'increasing';
-    else if (change < -5) direction = 'decreasing';
-    else direction = 'stable';
-
-    return { direction, percentage: change };
-  }
-
   exportReport(): string {
-    const latest = this.getLatestSnapshot();
-    const trend = this.getMemoryTrend();
-
+    const report = this.analyze();
+    
     return `
 Memory Leak Detection Report
 =============================
-Timestamp: ${new Date().toISOString()}
+Duration: ${report.duration.toFixed(2)}s
+Snapshots: ${report.snapshots.length}
 
-Current Memory Usage:
-- Heap Used: ${latest ? (latest.heapUsed / 1024 / 1024).toFixed(2) : 0} MB
-- Heap Total: ${latest ? (latest.heapTotal / 1024 / 1024).toFixed(2) : 0} MB
-- External: ${latest ? (latest.external / 1024 / 1024).toFixed(2) : 0} MB
-- RSS: ${latest ? (latest.rss / 1024 / 1024).toFixed(2) : 0} MB
-- Array Buffers: ${latest ? (latest.arrayBuffers / 1024 / 1024).toFixed(2) : 0} MB
+Memory Usage:
+- Start: ${(report.snapshots[0]?.heapUsed / 1024 / 1024).toFixed(2)} MB
+- End: ${(report.snapshots[report.snapshots.length - 1]?.heapUsed / 1024 / 1024).toFixed(2)} MB
+- Growth: ${((report.snapshots[report.snapshots.length - 1]?.heapUsed - report.snapshots[0]?.heapUsed) / 1024 / 1024).toFixed(2)} MB
 
-Memory Trend:
-- Direction: ${trend.direction}
-- Change: ${trend.percentage.toFixed(2)}%
+Growth Rate: ${(report.growthRate / 1024 / 1024).toFixed(4)} MB/s
+Leak Detected: ${report.hasLeak ? 'YES ⚠️' : 'NO ✓'}
 
-Warnings: ${this.warnings.length}
-${this.warnings.map(w => `- [${w.severity.toUpperCase()}] ${w.message}`).join('\n')}
-
-Snapshots Collected: ${this.snapshots.length}
+Recommendation:
+${report.recommendation}
     `.trim();
-  }
-
-  reset() {
-    this.snapshots = [];
-    this.warnings = [];
   }
 }
 
