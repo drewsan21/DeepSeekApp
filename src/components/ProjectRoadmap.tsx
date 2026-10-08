@@ -51,6 +51,13 @@ const phases = [
       { name: 'Browser manager (tabs + context menu)', done: true },
       { name: 'Permission manager', done: true },
       { name: 'Provider config manager', done: true },
+      { name: 'Qwen Auth Manager (account + local)', done: true },
+      { name: 'MCP Server Manager', done: true },
+      { name: 'GitHub API Client', done: true },
+      { name: 'Local Git Server Manager (Gitea)', done: true },
+      { name: 'Project Sync Service', done: true },
+      { name: 'Tool Registry', done: true },
+      { name: 'Skill Manager', done: true },
     ]
   },
   {

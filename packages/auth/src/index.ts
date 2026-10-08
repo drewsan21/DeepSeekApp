@@ -7,6 +7,9 @@ export interface SecretStore {
   delete(key: string): Promise<void>;
 }
 
+// Re-export QwenAuthManager
+export * from './QwenAuthManager';
+
 export class AuthManager {
   private win: BrowserWindow | null = null;
   private partition = 'persist:deepseek-auth';
