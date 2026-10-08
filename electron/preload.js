@@ -88,4 +88,81 @@ contextBridge.exposeInMainWorld('deepseek', {
     setSite: (origin, permissions) => ipcRenderer.invoke('permissions:setSite', { origin, permissions }),
     resetSite: (origin) => ipcRenderer.invoke('permissions:resetSite', origin),
   },
+
+  // Conversations - REAL PERSISTENT STORAGE
+  conversations: {
+    create: (title, providerId, model, metadata) => 
+      ipcRenderer.invoke('conversation:create', title, providerId, model, metadata),
+    get: (id) => ipcRenderer.invoke('conversation:get', id),
+    getAll: () => ipcRenderer.invoke('conversation:getAll'),
+    getWithMessages: (id) => ipcRenderer.invoke('conversation:getWithMessages', id),
+    updateTitle: (id, title) => ipcRenderer.invoke('conversation:updateTitle', id, title),
+    delete: (id) => ipcRenderer.invoke('conversation:delete', id),
+    addMessage: (conversationId, role, content, metadata) => 
+      ipcRenderer.invoke('conversation:addMessage', conversationId, role, content, metadata),
+    getMessages: (conversationId) => ipcRenderer.invoke('conversation:getMessages', conversationId),
+    search: (query) => ipcRenderer.invoke('conversation:search', query),
+    getRecent: (limit) => ipcRenderer.invoke('conversation:getRecent', limit),
+    getStats: () => ipcRenderer.invoke('conversation:getStats'),
+    export: (id) => ipcRenderer.invoke('conversation:export', id),
+    import: (data) => ipcRenderer.invoke('conversation:import', data),
+    duplicate: (id) => ipcRenderer.invoke('conversation:duplicate', id),
+  },
+
+  // Workspaces - REAL PERSISTENT STORAGE
+  workspaces: {
+    create: (name, description, config) => 
+      ipcRenderer.invoke('workspace:create', name, description, config),
+    get: (id) => ipcRenderer.invoke('workspace:get', id),
+    getAll: () => ipcRenderer.invoke('workspace:getAll'),
+    getActive: () => ipcRenderer.invoke('workspace:getActive'),
+    setActive: (id) => ipcRenderer.invoke('workspace:setActive', id),
+    update: (id, updates) => ipcRenderer.invoke('workspace:update', id, updates),
+    delete: (id) => ipcRenderer.invoke('workspace:delete', id),
+    search: (query) => ipcRenderer.invoke('workspace:search', query),
+    getStats: () => ipcRenderer.invoke('workspace:getStats'),
+    export: (id) => ipcRenderer.invoke('workspace:export', id),
+    import: (data) => ipcRenderer.invoke('workspace:import', data),
+    duplicate: (id) => ipcRenderer.invoke('workspace:duplicate', id),
+  },
+
+  // Settings - REAL PERSISTENT STORAGE
+  settings: {
+    get: (key, defaultValue) => ipcRenderer.invoke('settings:get', key, defaultValue),
+    set: (key, value) => ipcRenderer.invoke('settings:set', key, value),
+    getAll: () => ipcRenderer.invoke('settings:getAll'),
+    reset: () => ipcRenderer.invoke('settings:reset'),
+    getTheme: () => ipcRenderer.invoke('settings:getTheme'),
+    setTheme: (theme) => ipcRenderer.invoke('settings:setTheme', theme),
+    getDefaultProvider: () => ipcRenderer.invoke('settings:getDefaultProvider'),
+    setDefaultProvider: (provider) => ipcRenderer.invoke('settings:setDefaultProvider', provider),
+    isToolEnabled: (toolName) => ipcRenderer.invoke('settings:isToolEnabled', toolName),
+    setToolEnabled: (toolName, enabled) => ipcRenderer.invoke('settings:setToolEnabled', toolName, enabled),
+    getEnabledTools: () => ipcRenderer.invoke('settings:getEnabledTools'),
+    getUISettings: () => ipcRenderer.invoke('settings:getUISettings'),
+    setUISettings: (settings) => ipcRenderer.invoke('settings:setUISettings', settings),
+    export: () => ipcRenderer.invoke('settings:export'),
+    import: (settingsJson) => ipcRenderer.invoke('settings:import', settingsJson),
+  },
+
+  // Secrets - REAL SECURE STORAGE
+  secrets: {
+    set: (key, value) => ipcRenderer.invoke('secret:set', key, value),
+    get: (key) => ipcRenderer.invoke('secret:get', key),
+    delete: (key) => ipcRenderer.invoke('secret:delete', key),
+    has: (key) => ipcRenderer.invoke('secret:has', key),
+    setApiKey: (providerId, apiKey) => ipcRenderer.invoke('secret:setApiKey', providerId, apiKey),
+    getApiKey: (providerId) => ipcRenderer.invoke('secret:getApiKey', providerId),
+    deleteApiKey: (providerId) => ipcRenderer.invoke('secret:deleteApiKey', providerId),
+    setOAuthToken: (provider, token) => ipcRenderer.invoke('secret:setOAuthToken', provider, token),
+    getOAuthToken: (provider) => ipcRenderer.invoke('secret:getOAuthToken', provider),
+    deleteOAuthToken: (provider) => ipcRenderer.invoke('secret:deleteOAuthToken', provider),
+    clearAll: () => ipcRenderer.invoke('secret:clearAll'),
+  },
+
+  // Database
+  database: {
+    getStats: () => ipcRenderer.invoke('database:getStats'),
+    vacuum: () => ipcRenderer.invoke('database:vacuum'),
+  },
 });
