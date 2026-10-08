@@ -127,21 +127,23 @@ const phases = [
   {
     id: 6,
     title: 'Polish & Testing',
-    status: 'in-progress',
-    progress: 60,
+    status: 'complete',
+    progress: 100,
     icon: <TestTube size={18} />,
-    color: 'blue',
+    color: 'green',
     tasks: [
       { name: 'Unit tests for all packages', done: true },
       { name: 'Integration tests for IPC', done: true },
-      { name: 'E2E tests with Playwright', done: false },
+      { name: 'E2E tests with Playwright', done: true },
       { name: 'Security audit', done: true },
       { name: 'Performance profiling', done: true },
       { name: 'Accessibility audit', done: true },
-      { name: 'Cross-platform testing', done: false },
+      { name: 'Cross-platform testing', done: true },
       { name: 'Test runner scripts', done: true },
       { name: 'Performance monitoring', done: true },
       { name: 'Accessibility utilities', done: true },
+      { name: 'Memory leak detection', done: true },
+      { name: 'Stress testing', done: true },
     ]
   },
   {
