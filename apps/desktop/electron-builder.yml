@@ -18,7 +18,12 @@ asarUnpack:
 extraResources:
   - from: packaging/metainfo/deepseek-desktop.metainfo.xml
     to: deepseek-desktop.metainfo.xml
+    filter:
+      - "**/*"
 
+# ============================================================
+# Linux Configuration
+# ============================================================
 linux:
   category: Development;Utility;
   maintainer: DeepSeek Maintainers <maintainer@example.com>
@@ -30,6 +35,9 @@ linux:
       arch:
         - x64
         - arm64
+    - target: AppImage
+      arch:
+        - x64
 
 deb:
   packageName: deepseek-desktop
@@ -43,3 +51,74 @@ deb:
     - libxss1
     - libasound2
     - libsecret-1-0
+
+# ============================================================
+# Windows Configuration
+# ============================================================
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - arm64
+    - target: portable
+      arch:
+        - x64
+  icon: packaging/icons/icon.ico
+  publisherName: DeepSeek
+  legalTrademarks: DeepSeek Desktop
+  requestedExecutionLevel: asInvoker
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: packaging/icons/icon.ico
+  uninstallerIcon: packaging/icons/icon.ico
+  installerHeaderIcon: packaging/icons/icon.ico
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: DeepSeek Desktop
+  license: LICENSE
+  installerLanguages:
+    - en_US
+  language: 1033
+  deleteAppDataOnUninstall: false
+
+portable:
+  artifactName: deepseek-desktop-portable-${version}-${arch}.exe
+
+# ============================================================
+# macOS Configuration (Future)
+# ============================================================
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  icon: packaging/icons/icon.icns
+  category: public.app-category.developer-tools
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: packaging/entitlements.mac.plist
+  entitlementsInherit: packaging/entitlements.mac.plist
+
+dmg:
+  sign: false
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+
+# ============================================================
+# Auto-Update Configuration
+# ============================================================
+publish:
+  - provider: github
+    owner: deepseek
+    repo: deepseek-desktop
+    releaseType: release

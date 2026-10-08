@@ -1,60 +1,48 @@
 @echo off
-setlocal EnableDelayedExpansion
-REM ============================================================================
-REM DeepSeek Desktop — Production Server (Windows)
-REM ============================================================================
-REM Builds the app and serves the optimized production build on localhost.
-REM Faster and smaller than the dev server — use this for daily use.
-REM
-REM Usage:
-REM   Double-click serve.bat  OR  run from Command Prompt
-REM ============================================================================
+setlocal enabledelayedexpansion
 
-title DeepSeek Desktop — Production Server
-
-cd /d "%~dp0"
-
-if "%PORT%"=="" set PORT=3000
-set HOST=localhost
-set URL=http://%HOST%:%PORT%
+REM ============================================================
+REM DeepSeek Desktop - Windows Production Server
+REM Builds and serves the production version
+REM ============================================================
 
 echo.
-echo ================================================================
-echo        DeepSeek Desktop — Production Server
-echo ================================================================
+echo ============================================================
+echo   DeepSeek Desktop - Production Mode (Windows)
+echo ============================================================
 echo.
 
-REM ---------- Check dependencies ----------
+REM Check if node_modules exists
 if not exist "node_modules\" (
-    echo [WARN] node_modules not found. Running installer...
+    echo [INFO] Dependencies not installed. Running installer...
     call install.bat
+    if %errorlevel% neq 0 (
+        echo [ERROR] Installation failed
+        pause
+        exit /b 1
+    )
 )
 
-REM ---------- Build ----------
-echo Building optimized production bundle...
-call npm run build --silent
-if %ERRORLEVEL% neq 0 (
-    echo [ERROR] Build failed.
+REM Build for production
+echo.
+echo [1/2] Building for production...
+cd apps\desktop
+pnpm build
+if %errorlevel% neq 0 (
+    echo [ERROR] Build failed
     pause
     exit /b 1
 )
-echo   [OK] Build complete.
-echo.
+cd ..\..
+echo [OK] Build complete
 
-REM ---------- Serve ----------
-echo Starting production server...
+REM Start Electron
 echo.
-echo   App URL : %URL%
-echo   Press Ctrl+C to stop
-echo.
-
-REM Open browser after a short delay
-start "" cmd /c "timeout /t 1 /nobreak >nul && start %URL%"
-
-REM Use Vite's built-in preview server
-set PORT=%PORT%
-call npx vite preview --port %PORT% --host 0.0.0.0
+echo [2/2] Starting application...
+cd apps\desktop
+pnpm dev
+cd ..\..
 
 echo.
-echo Server stopped.
+echo [INFO] Application closed
 pause

@@ -1,25 +1,90 @@
 {
   "name": "@deepseek/desktop",
   "version": "0.1.0",
+  "description": "DeepSeek Desktop - Harness, Auth, and Browser in one app",
   "main": "dist/electron/main.js",
+  "author": "DeepSeek",
+  "license": "MIT",
   "scripts": {
     "dev": "electron .",
+    "dev:renderer": "cd renderer && pnpm dev",
     "build:electron": "node scripts/build-main.mjs",
-    "build:renderer": "pnpm -F @deepseek/renderer build",
+    "build:renderer": "cd renderer && pnpm build",
     "build": "pnpm build:renderer && pnpm build:electron",
-    "dist:deb": "pnpm build && electron-builder --config electron-builder.yml --linux deb --x64 --arm64"
+    "dist:linux": "pnpm build && electron-builder --config electron-builder.yml --linux",
+    "dist:win": "pnpm build && electron-builder --config electron-builder.yml --win",
+    "dist:mac": "pnpm build && electron-builder --config electron-builder.yml --mac",
+    "dist:all": "pnpm build && electron-builder --config electron-builder.yml -mwl",
+    "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
     "@deepseek/shared": "workspace:*",
     "@deepseek/secrets": "workspace:*",
     "@deepseek/auth": "workspace:*",
     "@deepseek/harness": "workspace:*",
-    "@deepseek/browser": "workspace:*"
+    "@deepseek/browser": "workspace:*",
+    "electron-updater": "^6.1.7"
   },
   "devDependencies": {
     "electron": "^30.0.0",
     "electron-builder": "^24.13.3",
     "esbuild": "^0.21.5",
     "typescript": "^5.4.0"
+  },
+  "build": {
+    "appId": "com.deepseek.desktop",
+    "productName": "DeepSeek Desktop",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/electron/**/*",
+      "renderer/dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "packaging/icons/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "deb",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        }
+      ],
+      "category": "Development",
+      "icon": "packaging/icons"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "packaging/icons/icon.icns"
+    }
   }
 }

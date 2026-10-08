@@ -37,13 +37,15 @@ import ComponentExplorer from './components/ComponentExplorer'
 import FeatureMatrix from './components/FeatureMatrix'
 import SecurityOverview from './components/SecurityOverview'
 import OverviewPanel from './components/OverviewPanel'
+import ProjectRoadmap from './components/ProjectRoadmap'
 
-type View = 'overview' | 'architecture' | 'roadmap' | 'components' | 'features' | 'security'
+type View = 'overview' | 'architecture' | 'roadmap' | 'project' | 'components' | 'features' | 'security'
 
 const navItems: { id: View; label: string; icon: React.ReactNode }[] = [
   { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={18} /> },
   { id: 'architecture', label: 'Architecture', icon: <Layers size={18} /> },
-  { id: 'roadmap', label: 'Roadmap', icon: <Route size={18} /> },
+  { id: 'project', label: 'Project Plan', icon: <Route size={18} /> },
+  { id: 'roadmap', label: 'Phases', icon: <Route size={18} /> },
   { id: 'components', label: 'Components', icon: <Package size={18} /> },
   { id: 'features', label: 'Features', icon: <CheckSquare size={18} /> },
   { id: 'security', label: 'Security', icon: <Shield size={18} /> },
@@ -157,6 +159,7 @@ export default function App() {
             >
               {activeView === 'overview' && <OverviewPanel />}
               {activeView === 'architecture' && <ArchitectureView />}
+              {activeView === 'project' && <ProjectRoadmap />}
               {activeView === 'roadmap' && <PhaseRoadmap />}
               {activeView === 'components' && <ComponentExplorer />}
               {activeView === 'features' && <FeatureMatrix />}
