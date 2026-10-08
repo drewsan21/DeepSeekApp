@@ -11,31 +11,87 @@ import type {
   Permission,
   ProviderConfigureRequest,
   ProviderPublicConfig,
-  SitePermission
+  SitePermission,
+  MCPServer,
+  Skill,
+  ProjectSyncStatus,
+  GitHubRepository,
+  GitHubIssue,
+  GitHubPullRequest,
+  ComputerUseAction
 } from '@deepseek/shared';
 
-export type View = 'workspace' | 'browser' | 'settings';
+export type View = 'workspace' | 'browser' | 'settings' | 'providers' | 'mcp' | 'github' | 'skills' | 'projects' | 'browser-use';
 export type PageAction = 'ask' | 'summarize' | 'explain' | 'rewrite' | 'translate';
+
+interface ComputerUseApproval {
+  id: string;
+  tool: string;
+  args: any;
+  description: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  localPath: string;
+  remoteUrl?: string;
+  syncStatus?: 'synced' | 'pending' | 'error' | 'syncing';
+  pendingChanges?: number;
+  lastSyncedAt?: string;
+  syncError?: string;
+}
 
 interface AppState {
   initialized: boolean;
   view: View;
 
+  // Auth
   authStatus: AuthStatus | null;
+  
+  // Providers
   selectedProvider: string;
   selectedModel: string;
-
+  providerConfigs: ProviderPublicConfig[];
+  
+  // Browser
   tabs: BrowserTab[];
   activeTabId: string | null;
   browserUrl: string;
+  currentUrl: string;
 
+  // Harness
   harnessEvents: HarnessEvent[];
   assistantOutput: string;
   approvals: ApprovalRequest[];
 
+  // Permissions
   sitePermissions: SitePermission[];
-  providerConfigs: ProviderPublicConfig[];
 
+  // MCP Servers
+  mcpServers: MCPServer[];
+  mcpServerStatus: Record<string, string>;
+
+  // GitHub
+  githubAuthenticated: boolean;
+  githubUsername: string;
+  githubRepos: GitHubRepository[];
+  githubIssues: GitHubIssue[];
+  githubPRs: GitHubPullRequest[];
+
+  // Skills
+  installedSkills: Skill[];
+  availableSkills: Skill[];
+
+  // Projects
+  projects: Project[];
+  isSyncing: boolean;
+
+  // Computer Use
+  pendingApproval: ComputerUseApproval | null;
+  isBrowserActionRunning: boolean;
+
+  // Actions
   initialize(): Promise<void>;
   setView(view: View): void;
 
@@ -44,11 +100,13 @@ interface AppState {
 
   setProvider(id: string): void;
   setModel(id: string): void;
+  configureProvider(req: ProviderConfigureRequest): Promise<void>;
 
   createTab(url: string): Promise<void>;
   activateTab(id: string): Promise<void>;
   closeTab(id: string): Promise<void>;
   setBrowserBounds(bounds: BrowserBounds): void;
+  navigateTo(url: string): Promise<void>;
 
   askPage(mode: PageAction): Promise<void>;
   handleContextAction(payload: BrowserContextActionPayload): Promise<void>;
@@ -60,7 +118,32 @@ interface AppState {
   loadSettings(): Promise<void>;
   saveSitePermissions(origin: string, permissions: Permission[]): Promise<void>;
   resetSitePermissions(origin: string): Promise<void>;
-  configureProvider(req: ProviderConfigureRequest): Promise<void>;
+
+  // MCP
+  startMCPServer(serverId: string): Promise<void>;
+  stopMCPServer(serverId: string): Promise<void>;
+
+  // GitHub
+  loginGitHub(): Promise<void>;
+  logoutGitHub(): Promise<void>;
+  refreshGitHubData(): Promise<void>;
+
+  // Skills
+  installSkill(skillId: string): Promise<void>;
+  uninstallSkill(skillId: string): Promise<void>;
+  enableSkill(skillId: string): Promise<void>;
+  disableSkill(skillId: string): Promise<void>;
+
+  // Projects
+  syncProject(projectId: string): Promise<void>;
+  syncAllProjects(): Promise<void>;
+  addProject(localPath: string, remoteUrl?: string): Promise<void>;
+  removeProject(projectId: string): Promise<void>;
+
+  // Computer Use
+  approveAction(id: string): void;
+  denyAction(id: string): void;
+  executeBrowserAction(action: any): Promise<void>;
 }
 
 function normalizeUrl(url: string) {
@@ -110,20 +193,50 @@ export const useStore = create<AppState>((set, get) => ({
   initialized: false,
   view: 'workspace',
 
+  // Auth
   authStatus: null,
+  
+  // Providers
   selectedProvider: 'deepseek-account',
   selectedModel: 'auto',
-
+  providerConfigs: [],
+  
+  // Browser
   tabs: [],
   activeTabId: null,
   browserUrl: 'https://duckduckgo.com',
+  currentUrl: 'https://duckduckgo.com',
 
+  // Harness
   harnessEvents: [],
   assistantOutput: '',
   approvals: [],
 
+  // Permissions
   sitePermissions: [],
-  providerConfigs: [],
+
+  // MCP Servers
+  mcpServers: [],
+  mcpServerStatus: {},
+
+  // GitHub
+  githubAuthenticated: false,
+  githubUsername: '',
+  githubRepos: [],
+  githubIssues: [],
+  githubPRs: [],
+
+  // Skills
+  installedSkills: [],
+  availableSkills: [],
+
+  // Projects
+  projects: [],
+  isSyncing: false,
+
+  // Computer Use
+  pendingApproval: null,
+  isBrowserActionRunning: false,
 
   async initialize() {
     if (get().initialized) return;
@@ -178,6 +291,46 @@ export const useStore = create<AppState>((set, get) => ({
     set({ tabs, activeTabId });
 
     await get().loadSettings();
+
+    // Load MCP servers
+    if ('mcp' in api) {
+      const mcpServers = await (api as any).mcp.list().catch(() => []);
+      const mcpServerStatus: Record<string, string> = {};
+      mcpServers.forEach((server: any) => {
+        mcpServerStatus[server.id] = server.status || 'stopped';
+      });
+      set({ mcpServers, mcpServerStatus });
+    }
+
+    // Load skills
+    if ('skills' in api) {
+      const skills = await (api as any).skills.list().catch(() => []);
+      set({
+        installedSkills: skills.filter((s: Skill) => s.isInstalled),
+        availableSkills: skills.filter((s: Skill) => !s.isInstalled)
+      });
+    }
+
+    // Load projects
+    if ('sync' in api) {
+      const projects = await (api as any).sync.listProjects().catch(() => []);
+      set({ projects });
+    }
+
+    // Check GitHub auth status
+    if ('github' in api) {
+      const githubStatus = await (api as any).github.status().catch(() => ({
+        authenticated: false
+      }));
+      set({
+        githubAuthenticated: githubStatus.authenticated,
+        githubUsername: githubStatus.username || ''
+      });
+
+      if (githubStatus.authenticated) {
+        await get().refreshGitHubData();
+      }
+    }
   },
 
   setView(view) {
@@ -361,5 +514,250 @@ export const useStore = create<AppState>((set, get) => ({
 
     await api.providers.configure(req);
     await get().loadSettings();
+  },
+
+  async navigateTo(url) {
+    const normalized = normalizeUrl(url);
+    set({ currentUrl: normalized, browserUrl: normalized });
+    await get().createTab(normalized);
+  },
+
+  // MCP Server Actions
+  async startMCPServer(serverId) {
+    const api = window.deepseek;
+    if (!api || !('mcp' in api)) return;
+
+    set(state => ({
+      mcpServerStatus: { ...state.mcpServerStatus, [serverId]: 'starting' }
+    }));
+
+    try {
+      await (api as any).mcp.start(serverId);
+      set(state => ({
+        mcpServerStatus: { ...state.mcpServerStatus, [serverId]: 'running' }
+      }));
+    } catch (error) {
+      set(state => ({
+        mcpServerStatus: { ...state.mcpServerStatus, [serverId]: 'error' }
+      }));
+    }
+  },
+
+  async stopMCPServer(serverId) {
+    const api = window.deepseek;
+    if (!api || !('mcp' in api)) return;
+
+    await (api as any).mcp.stop(serverId);
+    set(state => ({
+      mcpServerStatus: { ...state.mcpServerStatus, [serverId]: 'stopped' }
+    }));
+  },
+
+  // GitHub Actions
+  async loginGitHub() {
+    const api = window.deepseek;
+    if (!api || !('github' in api)) return;
+
+    const success = await (api as any).github.login();
+    if (success) {
+      const status = await (api as any).github.status();
+      set({
+        githubAuthenticated: status.authenticated,
+        githubUsername: status.username || ''
+      });
+      await get().refreshGitHubData();
+    }
+  },
+
+  async logoutGitHub() {
+    const api = window.deepseek;
+    if (!api || !('github' in api)) return;
+
+    await (api as any).github.logout();
+    set({
+      githubAuthenticated: false,
+      githubUsername: '',
+      githubRepos: [],
+      githubIssues: [],
+      githubPRs: []
+    });
+  },
+
+  async refreshGitHubData() {
+    const api = window.deepseek;
+    if (!api || !('github' in api)) return;
+
+    try {
+      const [repos, issues, prs] = await Promise.all([
+        (api as any).github.listRepos().catch(() => []),
+        (api as any).github.listIssues().catch(() => []),
+        (api as any).github.listPRs().catch(() => [])
+      ]);
+
+      set({ githubRepos: repos, githubIssues: issues, githubPRs: prs });
+    } catch (error) {
+      console.error('Failed to refresh GitHub data:', error);
+    }
+  },
+
+  // Skill Actions
+  async installSkill(skillId) {
+    const api = window.deepseek;
+    if (!api || !('skills' in api)) return;
+
+    await (api as any).skills.install(skillId);
+    const skills = await (api as any).skills.list();
+    set({
+      installedSkills: skills.filter((s: Skill) => s.isInstalled),
+      availableSkills: skills.filter((s: Skill) => !s.isInstalled)
+    });
+  },
+
+  async uninstallSkill(skillId) {
+    const api = window.deepseek;
+    if (!api || !('skills' in api)) return;
+
+    await (api as any).skills.uninstall(skillId);
+    const skills = await (api as any).skills.list();
+    set({
+      installedSkills: skills.filter((s: Skill) => s.isInstalled),
+      availableSkills: skills.filter((s: Skill) => !s.isInstalled)
+    });
+  },
+
+  async enableSkill(skillId) {
+    const api = window.deepseek;
+    if (!api || !('skills' in api)) return;
+
+    await (api as any).skills.enable(skillId);
+    const skills = await (api as any).skills.list();
+    set({
+      installedSkills: skills.filter((s: Skill) => s.isInstalled),
+      availableSkills: skills.filter((s: Skill) => !s.isInstalled)
+    });
+  },
+
+  async disableSkill(skillId) {
+    const api = window.deepseek;
+    if (!api || !('skills' in api)) return;
+
+    await (api as any).skills.disable(skillId);
+    const skills = await (api as any).skills.list();
+    set({
+      installedSkills: skills.filter((s: Skill) => s.isInstalled),
+      availableSkills: skills.filter((s: Skill) => !s.isInstalled)
+    });
+  },
+
+  // Project Sync Actions
+  async syncProject(projectId) {
+    const api = window.deepseek;
+    if (!api || !('sync' in api)) return;
+
+    set(state => ({
+      isSyncing: true,
+      projects: state.projects.map(p =>
+        p.id === projectId ? { ...p, syncStatus: 'syncing' as const } : p
+      )
+    }));
+
+    try {
+      const status = await (api as any).sync.syncProject(projectId);
+      set(state => ({
+        isSyncing: false,
+        projects: state.projects.map(p =>
+          p.id === projectId ? { ...p, ...status, syncStatus: 'synced' as const } : p
+        )
+      }));
+    } catch (error) {
+      set(state => ({
+        isSyncing: false,
+        projects: state.projects.map(p =>
+          p.id === projectId
+            ? { ...p, syncStatus: 'error' as const, syncError: String(error) }
+            : p
+        )
+      }));
+    }
+  },
+
+  async syncAllProjects() {
+    const api = window.deepseek;
+    if (!api || !('sync' in api)) return;
+
+    set({ isSyncing: true });
+
+    try {
+      const statuses = await (api as any).sync.syncAll();
+      set(state => ({
+        isSyncing: false,
+        projects: state.projects.map(p => {
+          const status = statuses.find((s: any) => s.projectId === p.id);
+          return status ? { ...p, ...status, syncStatus: 'synced' as const } : p;
+        })
+      }));
+    } catch (error) {
+      set({ isSyncing: false });
+    }
+  },
+
+  async addProject(localPath, remoteUrl) {
+    const api = window.deepseek;
+    if (!api || !('sync' in api)) return;
+
+    const projectId = crypto.randomUUID();
+    const projectName = localPath.split('/').pop() || 'Unknown Project';
+
+    await (api as any).sync.addProject(projectId, localPath, remoteUrl);
+
+    set(state => ({
+      projects: [
+        ...state.projects,
+        {
+          id: projectId,
+          name: projectName,
+          localPath,
+          remoteUrl,
+          syncStatus: 'pending'
+        }
+      ]
+    }));
+  },
+
+  async removeProject(projectId) {
+    const api = window.deepseek;
+    if (!api || !('sync' in api)) return;
+
+    await (api as any).sync.removeProject(projectId);
+    set(state => ({
+      projects: state.projects.filter(p => p.id !== projectId)
+    }));
+  },
+
+  // Computer Use Actions
+  approveAction(id) {
+    set({ pendingApproval: null });
+    // In a real implementation, this would trigger the actual action
+    console.log('Action approved:', id);
+  },
+
+  denyAction(id) {
+    set({ pendingApproval: null });
+    console.log('Action denied:', id);
+  },
+
+  async executeBrowserAction(action) {
+    set({ isBrowserActionRunning: true });
+
+    try {
+      const api = window.deepseek;
+      if (!api || !('browserUse' in api)) return;
+
+      await (api as any).browserUse.execute(action);
+    } catch (error) {
+      console.error('Browser action failed:', error);
+    } finally {
+      set({ isBrowserActionRunning: false });
+    }
   }
 }));

@@ -1,5 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useStore } from './store';
+import { ProviderSelector } from './components/ProviderSelector';
+import { MCPServerManager } from './components/MCPServerManager';
+import { GitHubIntegration } from './components/GitHubIntegration';
+import { SkillMarketplace } from './components/SkillMarketplace';
+import { ProjectSyncDashboard } from './components/ProjectSyncDashboard';
+import { ComputerUseApproval } from './components/ComputerUseApproval';
+import { BrowserUseControls } from './components/BrowserUseControls';
 
 function TopBar() {
   const authStatus = useStore(s => s.authStatus);
@@ -51,6 +58,26 @@ function Sidebar() {
       <button className={view === 'browser' ? 'active' : ''} onClick={() => setView('browser')}>
         Browser
       </button>
+      <button className={view === 'browser-use' ? 'active' : ''} onClick={() => setView('browser-use')}>
+        Browser Use
+      </button>
+      <div className="sidebar-divider" />
+      <button className={view === 'providers' ? 'active' : ''} onClick={() => setView('providers')}>
+        Providers
+      </button>
+      <button className={view === 'mcp' ? 'active' : ''} onClick={() => setView('mcp')}>
+        MCP Servers
+      </button>
+      <button className={view === 'github' ? 'active' : ''} onClick={() => setView('github')}>
+        GitHub
+      </button>
+      <button className={view === 'skills' ? 'active' : ''} onClick={() => setView('skills')}>
+        Skills
+      </button>
+      <button className={view === 'projects' ? 'active' : ''} onClick={() => setView('projects')}>
+        Projects
+      </button>
+      <div className="sidebar-divider" />
       <button className={view === 'settings' ? 'active' : ''} onClick={() => setView('settings')}>
         Settings
       </button>
@@ -318,11 +345,18 @@ export default function App() {
         <main className="main">
           {view === 'workspace' && <Workspace />}
           {view === 'browser' && <Browser />}
+          {view === 'browser-use' && <BrowserUseControls />}
+          {view === 'providers' && <ProviderSelector />}
+          {view === 'mcp' && <MCPServerManager />}
+          {view === 'github' && <GitHubIntegration />}
+          {view === 'skills' && <SkillMarketplace />}
+          {view === 'projects' && <ProjectSyncDashboard />}
           {view === 'settings' && <Settings />}
         </main>
       </div>
 
       <ApprovalModal />
+      <ComputerUseApproval />
     </div>
   );
 }

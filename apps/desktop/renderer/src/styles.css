@@ -19,6 +19,7 @@ input, select, textarea { padding: 7px 9px; }
 .body { flex: 1; display: flex; min-height: 0; }
 .sidebar { width: 220px; padding: 12px; display: grid; gap: 8px; border-right: 1px solid var(--border); }
 .sidebar button.active { border-color: var(--accent); }
+.sidebar-divider { height: 1px; background: var(--border); margin: 8px 0; }
 .main { flex: 1; min-width: 0; padding: 16px; overflow: auto; }
 
 .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
