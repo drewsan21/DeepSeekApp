@@ -147,17 +147,19 @@ const phases = [
   {
     id: 7,
     title: 'Release',
-    status: 'pending',
-    progress: 0,
+    status: 'complete',
+    progress: 100,
     icon: <Truck size={18} />,
-    color: 'gray',
+    color: 'green',
     tasks: [
-      { name: 'Version 0.1.0 alpha release', done: false },
-      { name: 'GitHub Releases with binaries', done: false },
-      { name: 'Changelog generation', done: false },
-      { name: 'Update server setup', done: false },
-      { name: 'User documentation website', done: false },
-      { name: 'CI/CD pipeline', done: false },
+      { name: 'Version 0.1.0 alpha release', done: true },
+      { name: 'GitHub Releases with binaries', done: true },
+      { name: 'Changelog generation', done: true },
+      { name: 'Update server setup', done: true },
+      { name: 'User documentation', done: true },
+      { name: 'CI/CD pipeline', done: true },
+      { name: 'Contributing guide', done: true },
+      { name: 'Issue templates', done: true },
     ]
   },
 ]
