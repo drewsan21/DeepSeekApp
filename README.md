@@ -1,10 +1,12 @@
 # 🎉 DeepSeek Desktop - v0.1.0-alpha
 
-> **ALL 7 PHASES COMPLETE** ✅
+> **ALL 7 PHASES COMPLETE** ✅ | **QWEN INTEGRATION IN PROGRESS** 🔧
 >
-> A comprehensive AI-powered desktop application combining multi-provider AI support, integrated browser automation, 51 tools, 20 skills, and enterprise-grade security.
+> A comprehensive AI-powered desktop application combining multi-provider AI support (DeepSeek, Qwen), integrated browser automation, 51 tools, 20 skills, and enterprise-grade security.
 >
 > **Platforms:** Windows (.exe) • Linux (.deb) • macOS (.dmg)
+>
+> **Qwen Integration:** 26% complete (43/167 tasks) - See [QWEN_PROGRESS.md](./QWEN_PROGRESS.md)
 
 ## 🚀 Quick Start
 
@@ -48,6 +50,7 @@ open DeepSeek-Desktop-0.1.0-alpha.dmg
 - **6 Providers**: DeepSeek API, DeepSeek Account, Qwen Account, Qwen Local, Custom OpenAI, Local Model
 - **11 Models**: DeepSeek Chat/Coder/Reasoner, Qwen Max/Plus/Turbo/Coder, and more
 - **Dynamic Switching**: Switch providers and models on the fly
+- **Qwen Integration**: OAuth2 authentication, streaming responses, model management (26% complete)
 
 ### 🌐 Integrated Browser
 - **Tab Management**: Create, switch, close tabs
@@ -179,6 +182,9 @@ See [TEST_SUITE.md](./TEST_SUITE.md) for complete test documentation.
 - [Contributing Guide](CONTRIBUTING.md) - How to contribute
 - [Changelog](CHANGELOG.md) - Version history
 - [Project Complete](PROJECT_COMPLETE.md) - Full project summary
+- [Qwen Integration Roadmap](QWEN_INTEGRATION_ROADMAP.md) - 167 detailed tasks
+- [Qwen Progress](QWEN_PROGRESS.md) - Current integration status
+- [Qwen Session Summary](QWEN_SESSION_SUMMARY.md) - Latest session accomplishments
 
 ---
 
