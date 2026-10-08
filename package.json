@@ -50,11 +50,15 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.ico",
@@ -80,7 +84,10 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "build/icon.icns",
@@ -110,11 +117,16 @@
       "target": [
         {
           "target": "deb",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         },
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icons",
@@ -159,6 +171,7 @@
     "@testing-library/user-event": "^14.6.7",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.6.4",
+    "axios": "^1.20.0",
     "canvas-confetti": "^1.9.3",
     "date-fns": "^2.30.0",
     "electron": "^44.7.0",

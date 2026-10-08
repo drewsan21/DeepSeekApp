@@ -1,8 +1,12 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { registerIpcHandlers } = require('./ipc-handlers');
+const { BrowserEngine } = require('./services/BrowserEngine');
+const { ToolExecutor } = require('./services/ToolExecutor');
 
 let mainWindow;
+let browserEngine;
+let toolExecutor;
 
 function createWindow() {
   // Create the browser window.
@@ -16,8 +20,12 @@ function createWindow() {
     },
   });
 
+  // Initialize real services
+  browserEngine = new BrowserEngine(mainWindow);
+  toolExecutor = new ToolExecutor();
+
   // Register IPC handlers
-  registerIpcHandlers(mainWindow);
+  registerIpcHandlers(mainWindow, browserEngine, toolExecutor);
 
   // Load the app
   if (process.env.NODE_ENV === 'development') {
