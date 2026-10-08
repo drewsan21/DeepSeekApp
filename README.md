@@ -94,10 +94,11 @@ open DeepSeek-Desktop-0.1.0-alpha.dmg
 | Total Components | 50+ |
 | Total Tools | 51 |
 | Total Skills | 20 |
-| Total Tests | 120+ |
-| Test Coverage | 96% |
-| Security Issues | 0 critical |
-| Accessibility | 97% WCAG 2.1 AA |
+| Total Tests | 90 |
+| Test Files | 5 |
+| Test Framework | Jest + React Testing Library |
+| Electron App | ✅ Working (mock implementations) |
+| Dashboard UI | ✅ Complete |
 
 ---
 
@@ -139,19 +140,34 @@ open DeepSeek-Desktop-0.1.0-alpha.dmg
 
 ### Run All Tests
 ```bash
-# Linux/macOS
-./scripts/run-tests.sh
+# Run all tests
+npm test
 
-# Windows
-scripts\run-tests.bat
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run specific test file
+npm test -- App.test.tsx
+npm test -- utils.test.ts
 ```
 
-### Test Coverage
-- ✅ Unit Tests: 105+ (96% coverage)
-- ✅ Integration Tests: 15 (100% coverage)
-- ✅ E2E Tests: Playwright suite
-- ✅ Security Audit: 0 critical issues
-- ✅ Accessibility: 97% WCAG 2.1 AA
+### Test Suite
+- **Total Tests**: 90 test cases
+- **Test Files**: 5 test files
+- **Framework**: Jest + React Testing Library
+- **Coverage**: 75%+ estimated
+
+### What's Tested
+- ✅ App component rendering and navigation (8 tests)
+- ✅ Utility functions (42 tests)
+- ✅ Electron IPC handlers (18 tests)
+- ✅ Preload script API surface (14 tests)
+- ✅ Test infrastructure verification (8 tests)
+
+See [TEST_SUITE.md](./TEST_SUITE.md) for complete test documentation.
 
 ---
 
