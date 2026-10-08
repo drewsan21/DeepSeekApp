@@ -1,5 +1,8 @@
+#!/usr/bin/env pwsh
+# ============================================================================
 # DeepSeek Desktop - Windows Build Script (PowerShell)
 # Generates .exe installer for Windows
+# ============================================================================
 
 $ErrorActionPreference = "Stop"
 

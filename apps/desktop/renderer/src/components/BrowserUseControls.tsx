@@ -1,229 +1,200 @@
-// ============================================================================
-// Browser Use Controls - Browser automation controls
-// ============================================================================
-
 import { useState } from 'react';
 import { useStore } from '../store';
-import {
-  Globe,
-  MousePointer,
-  Type,
-  Camera,
-  Search,
-  Play,
-  Square,
-  RotateCw,
-} from 'lucide-react';
 
 export function BrowserUseControls() {
-  const {
-    executeBrowserAction,
-    isBrowserActionRunning,
-    currentUrl,
-    navigateTo,
-  } = useStore();
+  const browserSession = useStore(s => s.browserSession);
+  const executeBrowserAction = useStore(s => s.executeBrowserAction);
+  const takeScreenshot = useStore(s => s.takeBrowserScreenshot);
 
-  const [url, setUrl] = useState(currentUrl || '');
+  const [actionType, setActionType] = useState('navigate');
+  const [url, setUrl] = useState('');
   const [selector, setSelector] = useState('');
   const [text, setText] = useState('');
-  const [activeAction, setActiveAction] = useState<string | null>(null);
+  const [script, setScript] = useState('');
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleNavigate = async () => {
-    if (url) {
-      setActiveAction('navigate');
-      await navigateTo(url);
-      setActiveAction(null);
-    }
-  };
+  const handleExecute = async () => {
+    setIsExecuting(true);
+    setError(null);
+    setResult(null);
 
-  const handleClick = async () => {
-    if (selector) {
-      setActiveAction('click');
-      await executeBrowserAction({
-        type: 'click',
-        selector,
-      });
-      setActiveAction(null);
-    }
-  };
+    try {
+      let action: any = { type: actionType };
 
-  const handleFill = async () => {
-    if (selector && text) {
-      setActiveAction('fill');
-      await executeBrowserAction({
-        type: 'fill',
-        selector,
-        text,
-      });
-      setActiveAction(null);
+      switch (actionType) {
+        case 'navigate':
+          action.url = url;
+          break;
+        case 'click':
+        case 'fill':
+        case 'scrape':
+        case 'wait':
+        case 'extract':
+          action.selector = selector;
+          if (actionType === 'fill') {
+            action.value = text;
+          }
+          break;
+        case 'evaluate':
+          action.script = script;
+          break;
+        case 'screenshot':
+          action.fullPage = false;
+          break;
+      }
+
+      const res = await executeBrowserAction(action);
+      setResult(res);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setIsExecuting(false);
     }
   };
 
   const handleScreenshot = async () => {
-    setActiveAction('screenshot');
-    await executeBrowserAction({
-      type: 'screenshot',
-    });
-    setActiveAction(null);
-  };
+    setIsExecuting(true);
+    setError(null);
+    setResult(null);
 
-  const handleScrape = async () => {
-    setActiveAction('scrape');
-    await executeBrowserAction({
-      type: 'scrape',
-      selector: selector || 'body',
-    });
-    setActiveAction(null);
+    try {
+      const screenshot = await takeScreenshot();
+      setResult({ type: 'screenshot', data: screenshot });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setIsExecuting(false);
+    }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-100">
-          Browser Automation
-        </h2>
-        {isBrowserActionRunning && (
-          <div className="flex items-center gap-2 text-sm text-blue-400">
-            <RotateCw className="w-4 h-4 animate-spin" />
-            <span>Running...</span>
-          </div>
+    <div className="browser-use-controls">
+      <div className="browser-controls-header">
+        <h3>Browser Automation</h3>
+        {browserSession && (
+          <span className="browser-session-info">
+            Session: {browserSession.id}
+          </span>
         )}
       </div>
 
-      {/* Navigation */}
-      <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
-        <div className="flex items-center gap-2 mb-3">
-          <Globe className="w-4 h-4 text-gray-400" />
-          <h3 className="text-sm font-medium text-gray-300">Navigation</h3>
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://example.com"
-            className="flex-1 px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500"
-          />
-          <button
-            onClick={handleNavigate}
-            disabled={!url || activeAction === 'navigate'}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition-colors flex items-center gap-2"
+      <div className="browser-controls-content">
+        <div className="action-selector">
+          <label>Action Type</label>
+          <select
+            value={actionType}
+            onChange={e => setActionType(e.target.value)}
+            className="action-select"
           >
-            <Play className="w-4 h-4" />
-            Go
-          </button>
-        </div>
-      </div>
-
-      {/* Actions Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {/* Click Action */}
-        <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
-          <div className="flex items-center gap-2 mb-3">
-            <MousePointer className="w-4 h-4 text-blue-400" />
-            <h3 className="text-sm font-medium text-gray-300">Click Element</h3>
-          </div>
-          <input
-            type="text"
-            value={selector}
-            onChange={(e) => setSelector(e.target.value)}
-            placeholder="CSS selector (e.g., #button, .class)"
-            className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 mb-2"
-          />
-          <button
-            onClick={handleClick}
-            disabled={!selector || activeAction === 'click'}
-            className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <MousePointer className="w-4 h-4" />
-            Click
-          </button>
+            <option value="navigate">Navigate</option>
+            <option value="click">Click Element</option>
+            <option value="fill">Fill Input</option>
+            <option value="scrape">Scrape Content</option>
+            <option value="wait">Wait For Element</option>
+            <option value="evaluate">Execute JavaScript</option>
+            <option value="extract">Extract Data</option>
+            <option value="screenshot">Take Screenshot</option>
+          </select>
         </div>
 
-        {/* Fill Action */}
-        <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
-          <div className="flex items-center gap-2 mb-3">
-            <Type className="w-4 h-4 text-green-400" />
-            <h3 className="text-sm font-medium text-gray-300">Fill Input</h3>
-          </div>
-          <input
-            type="text"
-            value={selector}
-            onChange={(e) => setSelector(e.target.value)}
-            placeholder="CSS selector"
-            className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 mb-2"
-          />
-          <input
-            type="text"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Text to fill"
-            className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 mb-2"
-          />
-          <button
-            onClick={handleFill}
-            disabled={!selector || !text || activeAction === 'fill'}
-            className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <Type className="w-4 h-4" />
-            Fill
-          </button>
+        <div className="action-parameters">
+          {actionType === 'navigate' && (
+            <div className="param-group">
+              <label>URL</label>
+              <input
+                type="text"
+                value={url}
+                onChange={e => setUrl(e.target.value)}
+                placeholder="https://example.com"
+                className="param-input"
+              />
+            </div>
+          )}
+
+          {(actionType === 'click' || actionType === 'fill' || 
+            actionType === 'scrape' || actionType === 'wait' || 
+            actionType === 'extract') && (
+            <div className="param-group">
+              <label>CSS Selector</label>
+              <input
+                type="text"
+                value={selector}
+                onChange={e => setSelector(e.target.value)}
+                placeholder="#element-id or .class-name"
+                className="param-input"
+              />
+            </div>
+          )}
+
+          {actionType === 'fill' && (
+            <div className="param-group">
+              <label>Value</label>
+              <input
+                type="text"
+                value={text}
+                onChange={e => setText(e.target.value)}
+                placeholder="Text to fill"
+                className="param-input"
+              />
+            </div>
+          )}
+
+          {actionType === 'evaluate' && (
+            <div className="param-group">
+              <label>JavaScript Code</label>
+              <textarea
+                value={script}
+                onChange={e => setScript(e.target.value)}
+                placeholder="document.title"
+                className="param-textarea"
+                rows={4}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Screenshot Action */}
-        <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
-          <div className="flex items-center gap-2 mb-3">
-            <Camera className="w-4 h-4 text-purple-400" />
-            <h3 className="text-sm font-medium text-gray-300">Screenshot</h3>
-          </div>
-          <p className="text-xs text-gray-400 mb-3">
-            Take a screenshot of the current page
-          </p>
+        <div className="action-buttons">
+          <button
+            onClick={handleExecute}
+            disabled={isExecuting}
+            className="execute-btn"
+          >
+            {isExecuting ? 'Executing...' : 'Execute'}
+          </button>
           <button
             onClick={handleScreenshot}
-            disabled={activeAction === 'screenshot'}
-            className="w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg transition-colors flex items-center justify-center gap-2"
+            disabled={isExecuting}
+            className="screenshot-btn"
           >
-            <Camera className="w-4 h-4" />
-            Take Screenshot
+            {isExecuting ? 'Capturing...' : 'Quick Screenshot'}
           </button>
         </div>
 
-        {/* Scrape Action */}
-        <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
-          <div className="flex items-center gap-2 mb-3">
-            <Search className="w-4 h-4 text-orange-400" />
-            <h3 className="text-sm font-medium text-gray-300">Scrape Content</h3>
+        {error && (
+          <div className="action-error">
+            <span className="error-icon">❌</span>
+            <span className="error-message">{error}</span>
           </div>
-          <input
-            type="text"
-            value={selector}
-            onChange={(e) => setSelector(e.target.value)}
-            placeholder="CSS selector (default: body)"
-            className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 mb-2"
-          />
-          <button
-            onClick={handleScrape}
-            disabled={activeAction === 'scrape'}
-            className="w-full px-3 py-2 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <Search className="w-4 h-4" />
-            Scrape
-          </button>
-        </div>
-      </div>
+        )}
 
-      {/* Help Text */}
-      <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-        <h3 className="text-sm font-medium text-blue-300 mb-2">
-          💡 Tips
-        </h3>
-        <ul className="text-xs text-blue-200 space-y-1">
-          <li>• Use CSS selectors to target elements (e.g., #id, .class, tag)</li>
-          <li>• Browser actions require approval for security</li>
-          <li>• Screenshots are saved to the workspace</li>
-          <li>• Scrape content extracts text from the page</li>
-        </ul>
+        {result && (
+          <div className="action-result">
+            <h4>Result</h4>
+            {result.type === 'screenshot' ? (
+              <img
+                src={`data:image/png;base64,${result.data}`}
+                alt="Screenshot"
+                className="result-screenshot"
+              />
+            ) : (
+              <pre className="result-json">
+                {JSON.stringify(result, null, 2)}
+              </pre>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

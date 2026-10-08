@@ -45,3 +45,171 @@ pre { white-space: pre-wrap; word-break: break-word; }
 
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: grid; place-items: center; z-index: 50; }
 .modal { width: 480px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: grid; gap: 10px; }
+
+/* Provider Selector */
+.provider-selector { max-width: 900px; }
+.provider-selector-header { margin-bottom: 16px; }
+.provider-selector-content { display: grid; gap: 16px; }
+.provider-group { display: grid; gap: 8px; }
+.provider-label { font-weight: 600; color: var(--muted); }
+.provider-select { width: 100%; }
+.provider-description { font-size: 12px; color: var(--muted); margin: 0; }
+.provider-info { display: grid; gap: 8px; padding: 12px; background: var(--bg); border-radius: 8px; }
+.provider-info-item { display: flex; justify-content: space-between; }
+.provider-info-label { color: var(--muted); }
+.provider-info-value { font-weight: 600; }
+
+/* MCP Server Manager */
+.mcp-server-manager { max-width: 900px; }
+.mcp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.mcp-count { color: var(--muted); font-size: 14px; }
+.mcp-server-list { display: grid; gap: 12px; }
+.mcp-server-item { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.mcp-server-header { display: flex; justify-content: space-between; align-items: center; }
+.mcp-server-info { display: flex; flex-direction: column; gap: 4px; }
+.mcp-server-name { font-weight: 600; }
+.mcp-server-status { font-size: 12px; padding: 2px 8px; border-radius: 12px; }
+.mcp-server-status.running { background: #10b98120; color: #10b981; }
+.mcp-server-status.stopped { background: #ef444420; color: #ef4444; }
+.mcp-server-status.error { background: #f59e0b20; color: #f59e0b; }
+.mcp-server-actions { display: flex; gap: 8px; }
+.mcp-toggle-btn { padding: 4px 12px; font-size: 12px; }
+.mcp-toggle-btn.start { background: #10b98120; color: #10b981; border-color: #10b981; }
+.mcp-toggle-btn.stop { background: #ef444420; color: #ef4444; border-color: #ef4444; }
+.mcp-expand-btn { background: transparent; border: none; padding: 4px 8px; }
+.mcp-server-details { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.mcp-server-description { color: var(--muted); margin: 0 0 12px 0; }
+.mcp-tools-section, .mcp-resources-section { margin-top: 12px; }
+.mcp-tools-section h4, .mcp-resources-section h4 { margin: 0 0 8px 0; font-size: 14px; }
+.mcp-tools-list, .mcp-resources-list { display: grid; gap: 6px; }
+.mcp-tool-item, .mcp-resource-item { padding: 8px; background: var(--bg); border-radius: 6px; }
+.mcp-tool-name, .mcp-resource-uri { font-weight: 600; display: block; }
+.mcp-tool-description, .mcp-resource-name { font-size: 12px; color: var(--muted); }
+
+/* GitHub Integration */
+.github-integration { max-width: 900px; }
+.github-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.github-auth-status { display: flex; align-items: center; gap: 12px; }
+.github-username { color: var(--accent); font-weight: 600; }
+.github-login-btn, .github-logout-btn { padding: 6px 12px; }
+.github-content { display: grid; gap: 16px; }
+.github-repo-selector { position: relative; }
+.github-repo-toggle { width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; }
+.github-arrow { font-size: 10px; }
+.github-repo-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; margin-top: 4px; max-height: 300px; overflow-y: auto; z-index: 10; }
+.github-repo-item { padding: 8px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.github-repo-item:hover { background: var(--bg); }
+.github-repo-name { font-weight: 500; }
+.github-repo-visibility { font-size: 12px; }
+.github-repo-actions { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.github-repo-actions h4 { margin: 0 0 12px 0; }
+.github-action-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.github-action-btn { padding: 8px; }
+
+/* Project Sync Dashboard */
+.project-sync-dashboard { max-width: 900px; }
+.sync-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.sync-all-btn { padding: 6px 12px; background: var(--accent); color: white; border-color: var(--accent); }
+.sync-all-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.project-list { display: grid; gap: 12px; }
+.project-item { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: border-color 0.2s; }
+.project-item:hover { border-color: var(--accent); }
+.project-item.selected { border-color: var(--accent); }
+.project-info { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.project-name { font-weight: 600; }
+.project-path { font-size: 12px; color: var(--muted); font-family: monospace; }
+.project-status { display: flex; justify-content: space-between; align-items: center; }
+.status-indicator { font-size: 12px; padding: 2px 8px; border-radius: 12px; }
+.status-indicator.green { background: #10b98120; color: #10b981; }
+.status-indicator.blue { background: #3b82f620; color: #3b82f6; }
+.status-indicator.red { background: #ef444420; color: #ef4444; }
+.status-indicator.yellow { background: #f59e0b20; color: #f59e0b; }
+.status-indicator.gray { background: #6b728020; color: #6b7280; }
+.sync-btn { background: transparent; border: 1px solid var(--border); padding: 4px 8px; font-size: 16px; }
+.sync-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.project-details { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: grid; gap: 8px; }
+.detail-row { display: flex; justify-content: space-between; }
+.detail-label { color: var(--muted); }
+.detail-value { font-weight: 500; }
+.detail-row.error .detail-value { color: #ef4444; }
+
+/* Computer Use Approval */
+.computer-use-approval { position: fixed; bottom: 20px; right: 20px; width: 400px; max-height: 500px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; z-index: 100; overflow-y: auto; }
+.approval-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.approval-count { color: var(--muted); font-size: 14px; }
+.approval-empty { text-align: center; padding: 20px; color: var(--muted); }
+.approval-list { display: grid; gap: 12px; }
+.approval-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.approval-item-header { display: flex; align-items: center; gap: 8px; }
+.approval-icon { font-size: 20px; }
+.approval-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.approval-action-type { font-weight: 600; text-transform: capitalize; }
+.approval-action-desc { font-size: 12px; color: var(--muted); }
+.approval-details-btn { background: transparent; border: none; padding: 4px 8px; }
+.approval-details { margin-top: 8px; }
+.approval-json { background: var(--panel); padding: 8px; border-radius: 6px; font-size: 11px; overflow-x: auto; }
+.approval-actions { display: flex; gap: 8px; margin-top: 12px; }
+.approval-btn { flex: 1; padding: 6px; font-size: 12px; }
+.approval-btn.approve { background: #10b98120; color: #10b981; border-color: #10b981; }
+.approval-btn.approve-remember { background: #3b82f620; color: #3b82f6; border-color: #3b82f6; }
+.approval-btn.reject { background: #ef444420; color: #ef4444; border-color: #ef4444; }
+
+/* Browser Use Controls */
+.browser-use-controls { max-width: 900px; }
+.browser-controls-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.browser-session-info { color: var(--muted); font-size: 14px; }
+.browser-controls-content { display: grid; gap: 16px; }
+.action-selector, .action-parameters { display: grid; gap: 8px; }
+.action-select, .param-input, .param-textarea { width: 100%; }
+.param-textarea { min-height: 100px; font-family: monospace; }
+.action-buttons { display: flex; gap: 8px; }
+.execute-btn, .screenshot-btn { flex: 1; padding: 8px; }
+.execute-btn { background: var(--accent); color: white; border-color: var(--accent); }
+.screenshot-btn { background: var(--panel); }
+.execute-btn:disabled, .screenshot-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.action-error { background: #ef444420; border: 1px solid #ef4444; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 8px; }
+.error-icon { font-size: 16px; }
+.error-message { color: #ef4444; }
+.action-result { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.action-result h4 { margin: 0 0 8px 0; }
+.result-screenshot { max-width: 100%; border-radius: 6px; }
+.result-json { background: var(--bg); padding: 8px; border-radius: 6px; font-size: 11px; overflow-x: auto; }
+
+/* Skill Marketplace */
+.skill-marketplace { max-width: 1200px; }
+.marketplace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.marketplace-stats { display: flex; gap: 16px; }
+.stat-item { color: var(--muted); font-size: 14px; }
+.marketplace-filters { display: flex; gap: 12px; margin-bottom: 16px; }
+.filter-group { display: flex; gap: 8px; }
+.search-input { flex: 1; }
+.filter-select { min-width: 150px; }
+.skill-list { display: grid; gap: 12px; }
+.skill-item { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: border-color 0.2s; }
+.skill-item:hover { border-color: var(--accent); }
+.skill-item.selected { border-color: var(--accent); }
+.skill-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.skill-icon { font-size: 32px; }
+.skill-info { flex: 1; }
+.skill-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.skill-name { font-weight: 600; font-size: 16px; }
+.skill-version { font-size: 12px; color: var(--muted); }
+.skill-meta { display: flex; gap: 12px; font-size: 12px; color: var(--muted); }
+.skill-status { }
+.status-badge { font-size: 12px; padding: 4px 8px; border-radius: 12px; }
+.status-badge.installed { background: #10b98120; color: #10b981; }
+.status-badge.available { background: #3b82f620; color: #3b82f6; }
+.skill-description { color: var(--muted); margin: 0 0 12px 0; }
+.skill-details { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: grid; gap: 12px; }
+.skill-tools, .skill-dependencies { }
+.skill-tools h4, .skill-dependencies h4 { margin: 0 0 8px 0; font-size: 14px; }
+.tools-list, .dependencies-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.tool-badge, .dependency-badge { font-size: 11px; padding: 4px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; }
+.skill-actions { display: flex; gap: 8px; }
+.install-btn, .toggle-btn, .uninstall-btn { padding: 6px 12px; }
+.install-btn { background: var(--accent); color: white; border-color: var(--accent); }
+.toggle-btn.enabled { background: #10b98120; color: #10b981; border-color: #10b981; }
+.toggle-btn.disabled { background: #6b728020; color: #6b7280; border-color: #6b7280; }
+.uninstall-btn { background: #ef444420; color: #ef4444; border-color: #ef4444; }
+.install-btn:disabled, .toggle-btn:disabled, .uninstall-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.no-results { text-align: center; padding: 40px; color: var(--muted); }

@@ -1,0 +1,97 @@
+name: Update Release Notes
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-notes:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate release notes
+        run: |
+          # Extract version from tag
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Generating release notes for version $VERSION"
+          
+          # Create release notes file
+          cat > release-notes.md << EOF
+          # DeepSeek Desktop v$VERSION
+          
+          ## What's New
+          
+          See the full changelog at [CHANGELOG.md](./CHANGELOG.md)
+          
+          ## Installation
+          
+          ### Windows
+          Download and run the installer: \`DeepSeek-Desktop-Setup-$VERSION.exe\`
+          
+          Or use the portable version: \`DeepSeek-Desktop-Portable-$VERSION.exe\`
+          
+          ### Linux
+          #### Debian/Ubuntu
+          \`\`\`bash
+          sudo apt install ./deepseek-desktop_$VERSION*_amd64.deb
+          \`\`\`
+          
+          #### Other Linux
+          Use the AppImage: \`DeepSeek-Desktop-$VERSION.AppImage\`
+          \`\`\`bash
+          chmod +x DeepSeek-Desktop-$VERSION.AppImage
+          ./DeepSeek-Desktop-$VERSION.AppImage
+          \`\`\`
+          
+          ### macOS
+          Download and open: \`DeepSeek-Desktop-$VERSION.dmg\`
+          Drag the app to your Applications folder.
+          
+          ## System Requirements
+          
+          - **Windows**: Windows 10/11 (x64 or ARM64)
+          - **Linux**: Debian 12+, Ubuntu 22.04+ (x64 or ARM64)
+          - **macOS**: macOS 14+ (Intel or Apple Silicon)
+          - **Node.js**: Not required (bundled with Electron)
+          
+          ## Getting Started
+          
+          1. Launch DeepSeek Desktop
+          2. Sign in to your DeepSeek or Qwen account (optional)
+          3. Configure API keys for additional providers (optional)
+          4. Start using the Harness, Browser, or other features
+          
+          ## Documentation
+          
+          - [User Manual](./docs/USER_MANUAL.md)
+          - [API Documentation](./docs/API.md)
+          - [Contributing Guide](./CONTRIBUTING.md)
+          
+          ## Support
+          
+          - [GitHub Issues](https://github.com/deepseek/deepseek-desktop/issues)
+          - [GitHub Discussions](https://github.com/deepseek/deepseek-desktop/discussions)
+          
+          ## License
+          
+          MIT License - See [LICENSE](./LICENSE) for details.
+          EOF
+          
+          echo "Release notes generated"
+
+      - name: Update release with notes
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release-notes.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

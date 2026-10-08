@@ -88,13 +88,15 @@ interface AppState {
   isSyncing: boolean;
 
   // Computer Use
-  pendingApproval: ComputerUseApproval | null;
+  pendingApprovals: ComputerUseApproval[];
   isBrowserActionRunning: boolean;
-
+  
+  // GitHub Auth
+  githubAuth: { authenticated: boolean; username?: string };
+  
   // Actions
   initialize(): Promise<void>;
   setView(view: View): void;
-
   login(): Promise<void>;
   logout(): Promise<void>;
 
@@ -235,9 +237,12 @@ export const useStore = create<AppState>((set, get) => ({
   isSyncing: false,
 
   // Computer Use
-  pendingApproval: null,
+  pendingApprovals: [],
   isBrowserActionRunning: false,
-
+  
+  // GitHub Auth
+  githubAuth: { authenticated: false },
+  
   async initialize() {
     if (get().initialized) return;
     set({ initialized: true });
@@ -735,14 +740,24 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   // Computer Use Actions
-  approveAction(id) {
-    set({ pendingApproval: null });
+  approveAction(id, remember = false) {
+    set(state => ({
+      pendingApprovals: state.pendingApprovals.filter(a => a.id !== id)
+    }));
+    
+    if (remember) {
+      // Store approval preference for future similar actions
+      console.log('Remembering approval for action:', id);
+    }
+    
     // In a real implementation, this would trigger the actual action
     console.log('Action approved:', id);
   },
 
-  denyAction(id) {
-    set({ pendingApproval: null });
+  rejectAction(id) {
+    set(state => ({
+      pendingApprovals: state.pendingApprovals.filter(a => a.id !== id)
+    }));
     console.log('Action denied:', id);
   },
 
@@ -753,11 +768,119 @@ export const useStore = create<AppState>((set, get) => ({
       const api = window.deepseek;
       if (!api || !('browserUse' in api)) return;
 
-      await (api as any).browserUse.execute(action);
+      const result = await (api as any).browserUse.execute(action);
+      return result;
     } catch (error) {
       console.error('Browser action failed:', error);
+      throw error;
     } finally {
       set({ isBrowserActionRunning: false });
+    }
+  },
+
+  async takeBrowserScreenshot() {
+    const api = window.deepseek;
+    if (!api || !('browserUse' in api)) return null;
+
+    try {
+      const result = await (api as any).browserUse.execute({ type: 'screenshot' });
+      return result.screenshot;
+    } catch (error) {
+      console.error('Screenshot failed:', error);
+      throw error;
+    }
+  },
+
+  // Load MCP Servers
+  async loadMCPServers() {
+    const api = window.deepseek;
+    if (!api || !('mcp' in api)) return;
+
+    try {
+      const servers = await (api as any).mcp.list();
+      set({ mcpServers: servers });
+    } catch (error) {
+      console.error('Failed to load MCP servers:', error);
+    }
+  },
+
+  // Load Skills
+  async loadSkills() {
+    const api = window.deepseek;
+    if (!api || !('skills' in api)) return;
+
+    try {
+      const skills = await (api as any).skills.list();
+      set({
+        installedSkills: skills.filter((s: Skill) => s.isInstalled),
+        availableSkills: skills.filter((s: Skill) => !s.isInstalled)
+      });
+    } catch (error) {
+      console.error('Failed to load skills:', error);
+    }
+  },
+
+  // Load Projects
+  async loadProjects() {
+    const api = window.deepseek;
+    if (!api || !('sync' in api)) return;
+
+    try {
+      const projects = await (api as any).sync.listProjects();
+      set({ projects });
+    } catch (error) {
+      console.error('Failed to load projects:', error);
+    }
+  },
+
+  // Load GitHub Repos
+  async loadGitHubRepos() {
+    const api = window.deepseek;
+    if (!api || !('github' in api)) return;
+
+    try {
+      const repos = await (api as any).github.listRepos();
+      set({ githubRepos: repos });
+    } catch (error) {
+      console.error('Failed to load GitHub repos:', error);
+    }
+  },
+
+  // Login to GitHub
+  async loginToGitHub(token: string) {
+    const api = window.deepseek;
+    if (!api || !('github' in api)) return;
+
+    try {
+      const success = await (api as any).github.login(token);
+      if (success) {
+        const status = await (api as any).github.status();
+        set({
+          githubAuth: {
+            authenticated: true,
+            username: status.username
+          }
+        });
+        await get().loadGitHubRepos();
+      }
+    } catch (error) {
+      console.error('GitHub login failed:', error);
+    }
+  },
+
+  // Logout from GitHub
+  async logoutFromGitHub() {
+    const api = window.deepseek;
+    if (!api || !('github' in api)) return;
+
+    try {
+      await (api as any).github.logout();
+      set({
+        githubAuth: { authenticated: false },
+        githubRepos: []
+      });
+    } catch (error) {
+      console.error('GitHub logout failed:', error);
     }
   }
 }));
