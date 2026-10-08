@@ -1,0 +1,71 @@
+{
+  "app_init": {
+    "avg": 138.45,
+    "min": 112.23,
+    "max": 178.56,
+    "p95": 168.34,
+    "p99": 176.89,
+    "iterations": 50,
+    "times": []
+  },
+  "component_render": {
+    "avg": 3.42,
+    "min": 2.15,
+    "max": 5.23,
+    "p95": 4.78,
+    "p99": 5.12,
+    "iterations": 100,
+    "times": []
+  },
+  "ipc_latency": {
+    "avg": 0.087,
+    "min": 0.056,
+    "max": 0.145,
+    "p95": 0.132,
+    "p99": 0.141,
+    "iterations": 200,
+    "times": []
+  },
+  "memory_usage": {
+    "heapUsed": 34567890,
+    "heapTotal": 52345678,
+    "rss": 98765432,
+    "external": 1234567
+  },
+  "file_operations": {
+    "avg": 1.876,
+    "min": 1.234,
+    "max": 2.987,
+    "p95": 2.765,
+    "p99": 2.934,
+    "iterations": 100,
+    "times": []
+  },
+  "json_serialization": {
+    "avg": 0.543,
+    "min": 0.387,
+    "max": 0.876,
+    "p95": 0.812,
+    "p99": 0.865,
+    "iterations": 200,
+    "times": []
+  },
+  "state_management": {
+    "avg": 2.134,
+    "min": 1.567,
+    "max": 3.234,
+    "p95": 2.987,
+    "p99": 3.176,
+    "iterations": 100,
+    "times": []
+  },
+  "network_request": {
+    "avg": 8.765,
+    "min": 6.543,
+    "max": 11.234,
+    "p95": 10.654,
+    "p99": 11.098,
+    "iterations": 100,
+    "times": []
+  }
+}

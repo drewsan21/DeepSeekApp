@@ -15,12 +15,17 @@
     "electron:dev": "NODE_ENV=development electron .",
     "electron:build": "npm run build && electron-builder",
     "electron:preview": "electron .",
-    "build:icons": "bash scripts/convert-icons.sh",
-    "build:win": "bash scripts/build-windows.sh",
-    "build:linux": "bash scripts/build-linux.sh",
-    "build:mac": "bash scripts/build-macos.sh",
+    "build:icons": "node scripts/convert-icons.js",
+    "build:win": "node scripts/build-platform.js win",
+    "build:linux": "node scripts/build-platform.js linux",
+    "build:mac": "node scripts/build-platform.js mac",
     "build:all": "npm run build && electron-builder -mwl",
-    "verify:build": "bash scripts/verify-builds.sh"
+    "verify:build": "node scripts/verify-builds.js",
+    "benchmark": "node scripts/run-benchmarks.js",
+    "benchmark:baseline": "node scripts/run-benchmarks.js --baseline",
+    "benchmark:compare": "node scripts/generate-performance-report.js",
+    "benchmark:monitor": "node scripts/performance-monitor.js",
+    "benchmark:report": "node scripts/generate-performance-report.js"
   },
   "build": {
     "appId": "com.deepseek.desktop",
@@ -94,7 +99,6 @@
           "y": 220
         },
         {
-          "x": 410,
           "x": 410,
           "y": 220,
           "type": "link",
