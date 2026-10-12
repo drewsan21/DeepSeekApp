@@ -10,17 +10,11 @@ const { promisify } = require('util');
 
 const execAsync = promisify(exec);
 
-export interface ToolResult {
-  success: boolean;
-  data?: any;
-  error?: string;
-}
-
-export class ToolExecutor {
+class ToolExecutor {
   /**
    * Execute a tool by name
    */
-  async execute(toolName: string, args: any): Promise<ToolResult> {
+  async execute(toolName, args) {
     try {
       switch (toolName) {
         // Computer Use Tools
@@ -87,7 +81,7 @@ export class ToolExecutor {
             error: `Unknown tool: ${toolName}`
           };
       }
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: error.message || 'Tool execution failed'
@@ -102,7 +96,7 @@ export class ToolExecutor {
   /**
    * Simulate mouse click (requires native module in production)
    */
-  private async computerUseClick(args: { x: number; y: number; button?: string }): Promise<ToolResult> {
+  async computerUseClick(args) {
     // In production, this would use robotjs or similar
     // For now, return success with coordinates
     return {
@@ -120,7 +114,7 @@ export class ToolExecutor {
   /**
    * Simulate keyboard typing
    */
-  private async computerUseType(args: { text: string; delay?: number }): Promise<ToolResult> {
+  async computerUseType(args) {
     // In production, this would use robotjs or similar
     return {
       success: true,
@@ -136,7 +130,7 @@ export class ToolExecutor {
   /**
    * Take screenshot of screen
    */
-  private async computerUseScreenshot(args: { region?: { x: number; y: number; width: number; height: number } }): Promise<ToolResult> {
+  async computerUseScreenshot(args) {
     // In production, this would use screenshot library
     return {
       success: true,
@@ -151,7 +145,7 @@ export class ToolExecutor {
   /**
    * Simulate scroll
    */
-  private async computerUseScroll(args: { x: number; y: number; deltaX: number; deltaY: number }): Promise<ToolResult> {
+  async computerUseScroll(args) {
     return {
       success: true,
       data: {
@@ -168,7 +162,7 @@ export class ToolExecutor {
   /**
    * Simulate key press
    */
-  private async computerUseKey(args: { key: string; modifiers?: string[] }): Promise<ToolResult> {
+  async computerUseKey(args) {
     return {
       success: true,
       data: {
@@ -187,10 +181,10 @@ export class ToolExecutor {
   /**
    * Read file contents
    */
-  private async fileSystemRead(args: { path: string; encoding?: string }): Promise<ToolResult> {
+  async fileSystemRead(args) {
     try {
       const content = await fs.readFile(args.path, {
-        encoding: (args.encoding as BufferEncoding) || 'utf8'
+        encoding: args.encoding || 'utf8'
       });
       return {
         success: true,
@@ -207,14 +201,14 @@ export class ToolExecutor {
   /**
    * Write file contents
    */
-  private async fileSystemWrite(args: { path: string; content: string; encoding?: string }): Promise<ToolResult> {
+  async fileSystemWrite(args) {
     try {
       // Ensure directory exists
       const dir = path.dirname(args.path);
       await fs.mkdir(dir, { recursive: true });
 
       await fs.writeFile(args.path, args.content, {
-        encoding: (args.encoding as BufferEncoding) || 'utf8'
+        encoding: args.encoding || 'utf8'
       });
       return {
         success: true,
@@ -231,7 +225,7 @@ export class ToolExecutor {
   /**
    * List directory contents
    */
-  private async fileSystemList(args: { path: string; recursive?: boolean }): Promise<ToolResult> {
+  async fileSystemList(args) {
     try {
       if (args.recursive) {
         const files = await this.readDirRecursive(args.path);
@@ -262,9 +256,9 @@ export class ToolExecutor {
   /**
    * Read directory recursively
    */
-  private async readDirRecursive(dirPath: string): Promise<any[]> {
+  async readDirRecursive(dirPath) {
     const entries = await fs.readdir(dirPath, { withFileTypes: true });
-    const files: any[] = [];
+    const files = [];
 
     for (const entry of entries) {
       const fullPath = path.join(dirPath, entry.name);
@@ -286,7 +280,7 @@ export class ToolExecutor {
   /**
    * Delete file or directory
    */
-  private async fileSystemDelete(args: { path: string; recursive?: boolean }): Promise<ToolResult> {
+  async fileSystemDelete(args) {
     try {
       if (args.recursive) {
         await fs.rm(args.path, { recursive: true, force: true });
@@ -313,7 +307,7 @@ export class ToolExecutor {
   /**
    * Create directory
    */
-  private async fileSystemMkdir(args: { path: string; recursive?: boolean }): Promise<ToolResult> {
+  async fileSystemMkdir(args) {
     try {
       await fs.mkdir(args.path, { recursive: args.recursive ?? true });
       return {
