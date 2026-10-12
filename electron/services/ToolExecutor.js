@@ -190,7 +190,7 @@ class ToolExecutor {
         success: true,
         data: { content, path: args.path }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to read file: ${error.message}`
@@ -214,7 +214,7 @@ class ToolExecutor {
         success: true,
         data: { path: args.path, bytesWritten: args.content.length }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to write file: ${error.message}`
@@ -245,7 +245,7 @@ class ToolExecutor {
           data: { path: args.path, files }
         };
       }
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to list directory: ${error.message}`
@@ -296,7 +296,7 @@ class ToolExecutor {
         success: true,
         data: { path: args.path, deleted: true }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to delete: ${error.message}`
@@ -314,7 +314,7 @@ class ToolExecutor {
         success: true,
         data: { path: args.path, created: true }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to create directory: ${error.message}`
@@ -325,7 +325,7 @@ class ToolExecutor {
   /**
    * Copy file or directory
    */
-  private async fileSystemCopy(args: { source: string; destination: string; recursive?: boolean }): Promise<ToolResult> {
+  async fileSystemCopy(args) {
     try {
       if (args.recursive) {
         await this.copyDirRecursive(args.source, args.destination);
@@ -336,7 +336,7 @@ class ToolExecutor {
         success: true,
         data: { source: args.source, destination: args.destination, copied: true }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to copy: ${error.message}`
@@ -347,7 +347,7 @@ class ToolExecutor {
   /**
    * Copy directory recursively
    */
-  private async copyDirRecursive(src: string, dest: string): Promise<void> {
+  async copyDirRecursive(src, dest) {
     await fs.mkdir(dest, { recursive: true });
     const entries = await fs.readdir(src, { withFileTypes: true });
 
@@ -366,14 +366,14 @@ class ToolExecutor {
   /**
    * Move file or directory
    */
-  private async fileSystemMove(args: { source: string; destination: string }): Promise<ToolResult> {
+  async fileSystemMove(args) {
     try {
       await fs.rename(args.source, args.destination);
       return {
         success: true,
         data: { source: args.source, destination: args.destination, moved: true }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to move: ${error.message}`
@@ -384,7 +384,7 @@ class ToolExecutor {
   /**
    * Get file stats
    */
-  private async fileSystemStats(args: { path: string }): Promise<ToolResult> {
+  async fileSystemStats(args) {
     try {
       const stats = await fs.stat(args.path);
       return {
@@ -399,7 +399,7 @@ class ToolExecutor {
           accessed: stats.atime.toISOString()
         }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to get stats: ${error.message}`
@@ -414,7 +414,7 @@ class ToolExecutor {
   /**
    * Get git status
    */
-  private async gitStatus(args: { repoPath: string }): Promise<ToolResult> {
+  async gitStatus(args) {
     try {
       const { stdout } = await execAsync('git status --porcelain', {
         cwd: args.repoPath
@@ -436,7 +436,7 @@ class ToolExecutor {
           isClean: changes.length === 0
         }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git status failed: ${error.message}`
@@ -447,7 +447,7 @@ class ToolExecutor {
   /**
    * Commit changes
    */
-  private async gitCommit(args: { repoPath: string; message: string; files?: string[] }): Promise<ToolResult> {
+  async gitCommit(args) {
     try {
       // Add files if specified
       if (args.files && args.files.length > 0) {
@@ -473,7 +473,7 @@ class ToolExecutor {
           output: stdout.trim()
         }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git commit failed: ${error.message}`
@@ -484,7 +484,7 @@ class ToolExecutor {
   /**
    * Push to remote
    */
-  private async gitPush(args: { repoPath: string; remote?: string; branch?: string }): Promise<ToolResult> {
+  async gitPush(args) {
     try {
       const remote = args.remote || 'origin';
       let cmd = `git push ${remote}`;
@@ -497,7 +497,7 @@ class ToolExecutor {
         success: true,
         data: { output: stdout.trim() }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git push failed: ${error.message}`
@@ -508,7 +508,7 @@ class ToolExecutor {
   /**
    * Pull from remote
    */
-  private async gitPull(args: { repoPath: string; remote?: string; branch?: string; rebase?: boolean }): Promise<ToolResult> {
+  async gitPull(args) {
     try {
       const remote = args.remote || 'origin';
       let cmd = 'git pull';
@@ -525,7 +525,7 @@ class ToolExecutor {
         success: true,
         data: { output: stdout.trim() }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git pull failed: ${error.message}`
@@ -536,7 +536,7 @@ class ToolExecutor {
   /**
    * Manage branches
    */
-  private async gitBranch(args: { repoPath: string; action: string; name?: string; base?: string }): Promise<ToolResult> {
+  async gitBranch(args) {
     try {
       let cmd: string;
 
@@ -565,7 +565,7 @@ class ToolExecutor {
         success: true,
         data: { output: stdout.trim() }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git branch failed: ${error.message}`
@@ -576,7 +576,7 @@ class ToolExecutor {
   /**
    * View commit history
    */
-  private async gitLog(args: { repoPath: string; count?: number }): Promise<ToolResult> {
+  async gitLog(args) {
     try {
       const count = args.count || 10;
       const { stdout } = await execAsync(`git log --oneline -n ${count}`, {
@@ -595,7 +595,7 @@ class ToolExecutor {
         success: true,
         data: { commits }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git log failed: ${error.message}`
@@ -610,7 +610,7 @@ class ToolExecutor {
   /**
    * Take screenshot (placeholder - requires native module)
    */
-  private async utilityScreenshot(args: any): Promise<ToolResult> {
+  async utilityScreenshot(args) {
     return {
       success: true,
       data: {
@@ -622,7 +622,7 @@ class ToolExecutor {
   /**
    * Read clipboard (placeholder - requires native module)
    */
-  private async utilityClipboardRead(args: any): Promise<ToolResult> {
+  async utilityClipboardRead(args) {
     return {
       success: true,
       data: {
@@ -634,7 +634,7 @@ class ToolExecutor {
   /**
    * Write to clipboard (placeholder - requires native module)
    */
-  private async utilityClipboardWrite(args: { content: string }): Promise<ToolResult> {
+  async utilityClipboardWrite(args) {
     return {
       success: true,
       data: {
@@ -647,7 +647,7 @@ class ToolExecutor {
   /**
    * Show notification (placeholder - requires native module)
    */
-  private async utilityNotification(args: { title: string; message: string }): Promise<ToolResult> {
+  async utilityNotification(args) {
     return {
       success: true,
       data: {
@@ -661,7 +661,7 @@ class ToolExecutor {
   /**
    * Open URL in default browser
    */
-  private async utilityOpenUrl(args: { url: string }): Promise<ToolResult> {
+  async utilityOpenUrl(args) {
     try {
       const platform = process.platform;
       let cmd: string;
@@ -679,7 +679,7 @@ class ToolExecutor {
         success: true,
         data: { url: args.url, opened: true }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to open URL: ${error.message}`
@@ -690,7 +690,7 @@ class ToolExecutor {
   /**
    * Get system information
    */
-  private async utilitySystemInfo(args: any): Promise<ToolResult> {
+  async utilitySystemInfo(args) {
     const os = require('os');
     return {
       success: true,
