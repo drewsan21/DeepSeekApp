@@ -10,17 +10,11 @@ const { promisify } = require('util');
 
 const execAsync = promisify(exec);
 
-export interface ToolResult {
-  success: boolean;
-  data?: any;
-  error?: string;
-}
-
-export class ToolExecutor {
+class ToolExecutor {
   /**
    * Execute a tool by name
    */
-  async execute(toolName: string, args: any): Promise<ToolResult> {
+  async execute(toolName, args) {
     try {
       switch (toolName) {
         // Computer Use Tools
@@ -87,7 +81,7 @@ export class ToolExecutor {
             error: `Unknown tool: ${toolName}`
           };
       }
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: error.message || 'Tool execution failed'
@@ -102,7 +96,7 @@ export class ToolExecutor {
   /**
    * Simulate mouse click (requires native module in production)
    */
-  private async computerUseClick(args: { x: number; y: number; button?: string }): Promise<ToolResult> {
+  async computerUseClick(args) {
     // In production, this would use robotjs or similar
     // For now, return success with coordinates
     return {
@@ -120,7 +114,7 @@ export class ToolExecutor {
   /**
    * Simulate keyboard typing
    */
-  private async computerUseType(args: { text: string; delay?: number }): Promise<ToolResult> {
+  async computerUseType(args) {
     // In production, this would use robotjs or similar
     return {
       success: true,
@@ -136,7 +130,7 @@ export class ToolExecutor {
   /**
    * Take screenshot of screen
    */
-  private async computerUseScreenshot(args: { region?: { x: number; y: number; width: number; height: number } }): Promise<ToolResult> {
+  async computerUseScreenshot(args) {
     // In production, this would use screenshot library
     return {
       success: true,
@@ -151,7 +145,7 @@ export class ToolExecutor {
   /**
    * Simulate scroll
    */
-  private async computerUseScroll(args: { x: number; y: number; deltaX: number; deltaY: number }): Promise<ToolResult> {
+  async computerUseScroll(args) {
     return {
       success: true,
       data: {
@@ -168,7 +162,7 @@ export class ToolExecutor {
   /**
    * Simulate key press
    */
-  private async computerUseKey(args: { key: string; modifiers?: string[] }): Promise<ToolResult> {
+  async computerUseKey(args) {
     return {
       success: true,
       data: {
@@ -187,16 +181,16 @@ export class ToolExecutor {
   /**
    * Read file contents
    */
-  private async fileSystemRead(args: { path: string; encoding?: string }): Promise<ToolResult> {
+  async fileSystemRead(args) {
     try {
       const content = await fs.readFile(args.path, {
-        encoding: (args.encoding as BufferEncoding) || 'utf8'
+        encoding: args.encoding || 'utf8'
       });
       return {
         success: true,
         data: { content, path: args.path }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to read file: ${error.message}`
@@ -207,20 +201,20 @@ export class ToolExecutor {
   /**
    * Write file contents
    */
-  private async fileSystemWrite(args: { path: string; content: string; encoding?: string }): Promise<ToolResult> {
+  async fileSystemWrite(args) {
     try {
       // Ensure directory exists
       const dir = path.dirname(args.path);
       await fs.mkdir(dir, { recursive: true });
 
       await fs.writeFile(args.path, args.content, {
-        encoding: (args.encoding as BufferEncoding) || 'utf8'
+        encoding: args.encoding || 'utf8'
       });
       return {
         success: true,
         data: { path: args.path, bytesWritten: args.content.length }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to write file: ${error.message}`
@@ -231,7 +225,7 @@ export class ToolExecutor {
   /**
    * List directory contents
    */
-  private async fileSystemList(args: { path: string; recursive?: boolean }): Promise<ToolResult> {
+  async fileSystemList(args) {
     try {
       if (args.recursive) {
         const files = await this.readDirRecursive(args.path);
@@ -251,7 +245,7 @@ export class ToolExecutor {
           data: { path: args.path, files }
         };
       }
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to list directory: ${error.message}`
@@ -262,9 +256,9 @@ export class ToolExecutor {
   /**
    * Read directory recursively
    */
-  private async readDirRecursive(dirPath: string): Promise<any[]> {
+  async readDirRecursive(dirPath) {
     const entries = await fs.readdir(dirPath, { withFileTypes: true });
-    const files: any[] = [];
+    const files = [];
 
     for (const entry of entries) {
       const fullPath = path.join(dirPath, entry.name);
@@ -286,7 +280,7 @@ export class ToolExecutor {
   /**
    * Delete file or directory
    */
-  private async fileSystemDelete(args: { path: string; recursive?: boolean }): Promise<ToolResult> {
+  async fileSystemDelete(args) {
     try {
       if (args.recursive) {
         await fs.rm(args.path, { recursive: true, force: true });
@@ -302,7 +296,7 @@ export class ToolExecutor {
         success: true,
         data: { path: args.path, deleted: true }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to delete: ${error.message}`
@@ -313,14 +307,14 @@ export class ToolExecutor {
   /**
    * Create directory
    */
-  private async fileSystemMkdir(args: { path: string; recursive?: boolean }): Promise<ToolResult> {
+  async fileSystemMkdir(args) {
     try {
       await fs.mkdir(args.path, { recursive: args.recursive ?? true });
       return {
         success: true,
         data: { path: args.path, created: true }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to create directory: ${error.message}`
@@ -331,7 +325,7 @@ export class ToolExecutor {
   /**
    * Copy file or directory
    */
-  private async fileSystemCopy(args: { source: string; destination: string; recursive?: boolean }): Promise<ToolResult> {
+  async fileSystemCopy(args) {
     try {
       if (args.recursive) {
         await this.copyDirRecursive(args.source, args.destination);
@@ -342,7 +336,7 @@ export class ToolExecutor {
         success: true,
         data: { source: args.source, destination: args.destination, copied: true }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to copy: ${error.message}`
@@ -353,7 +347,7 @@ export class ToolExecutor {
   /**
    * Copy directory recursively
    */
-  private async copyDirRecursive(src: string, dest: string): Promise<void> {
+  async copyDirRecursive(src, dest) {
     await fs.mkdir(dest, { recursive: true });
     const entries = await fs.readdir(src, { withFileTypes: true });
 
@@ -372,14 +366,14 @@ export class ToolExecutor {
   /**
    * Move file or directory
    */
-  private async fileSystemMove(args: { source: string; destination: string }): Promise<ToolResult> {
+  async fileSystemMove(args) {
     try {
       await fs.rename(args.source, args.destination);
       return {
         success: true,
         data: { source: args.source, destination: args.destination, moved: true }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to move: ${error.message}`
@@ -390,7 +384,7 @@ export class ToolExecutor {
   /**
    * Get file stats
    */
-  private async fileSystemStats(args: { path: string }): Promise<ToolResult> {
+  async fileSystemStats(args) {
     try {
       const stats = await fs.stat(args.path);
       return {
@@ -405,7 +399,7 @@ export class ToolExecutor {
           accessed: stats.atime.toISOString()
         }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to get stats: ${error.message}`
@@ -420,7 +414,7 @@ export class ToolExecutor {
   /**
    * Get git status
    */
-  private async gitStatus(args: { repoPath: string }): Promise<ToolResult> {
+  async gitStatus(args) {
     try {
       const { stdout } = await execAsync('git status --porcelain', {
         cwd: args.repoPath
@@ -442,7 +436,7 @@ export class ToolExecutor {
           isClean: changes.length === 0
         }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git status failed: ${error.message}`
@@ -453,7 +447,7 @@ export class ToolExecutor {
   /**
    * Commit changes
    */
-  private async gitCommit(args: { repoPath: string; message: string; files?: string[] }): Promise<ToolResult> {
+  async gitCommit(args) {
     try {
       // Add files if specified
       if (args.files && args.files.length > 0) {
@@ -479,7 +473,7 @@ export class ToolExecutor {
           output: stdout.trim()
         }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git commit failed: ${error.message}`
@@ -490,7 +484,7 @@ export class ToolExecutor {
   /**
    * Push to remote
    */
-  private async gitPush(args: { repoPath: string; remote?: string; branch?: string }): Promise<ToolResult> {
+  async gitPush(args) {
     try {
       const remote = args.remote || 'origin';
       let cmd = `git push ${remote}`;
@@ -503,7 +497,7 @@ export class ToolExecutor {
         success: true,
         data: { output: stdout.trim() }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git push failed: ${error.message}`
@@ -514,7 +508,7 @@ export class ToolExecutor {
   /**
    * Pull from remote
    */
-  private async gitPull(args: { repoPath: string; remote?: string; branch?: string; rebase?: boolean }): Promise<ToolResult> {
+  async gitPull(args) {
     try {
       const remote = args.remote || 'origin';
       let cmd = 'git pull';
@@ -531,7 +525,7 @@ export class ToolExecutor {
         success: true,
         data: { output: stdout.trim() }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git pull failed: ${error.message}`
@@ -542,7 +536,7 @@ export class ToolExecutor {
   /**
    * Manage branches
    */
-  private async gitBranch(args: { repoPath: string; action: string; name?: string; base?: string }): Promise<ToolResult> {
+  async gitBranch(args) {
     try {
       let cmd: string;
 
@@ -571,7 +565,7 @@ export class ToolExecutor {
         success: true,
         data: { output: stdout.trim() }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git branch failed: ${error.message}`
@@ -582,7 +576,7 @@ export class ToolExecutor {
   /**
    * View commit history
    */
-  private async gitLog(args: { repoPath: string; count?: number }): Promise<ToolResult> {
+  async gitLog(args) {
     try {
       const count = args.count || 10;
       const { stdout } = await execAsync(`git log --oneline -n ${count}`, {
@@ -601,7 +595,7 @@ export class ToolExecutor {
         success: true,
         data: { commits }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Git log failed: ${error.message}`
@@ -616,7 +610,7 @@ export class ToolExecutor {
   /**
    * Take screenshot (placeholder - requires native module)
    */
-  private async utilityScreenshot(args: any): Promise<ToolResult> {
+  async utilityScreenshot(args) {
     return {
       success: true,
       data: {
@@ -628,7 +622,7 @@ export class ToolExecutor {
   /**
    * Read clipboard (placeholder - requires native module)
    */
-  private async utilityClipboardRead(args: any): Promise<ToolResult> {
+  async utilityClipboardRead(args) {
     return {
       success: true,
       data: {
@@ -640,7 +634,7 @@ export class ToolExecutor {
   /**
    * Write to clipboard (placeholder - requires native module)
    */
-  private async utilityClipboardWrite(args: { content: string }): Promise<ToolResult> {
+  async utilityClipboardWrite(args) {
     return {
       success: true,
       data: {
@@ -653,7 +647,7 @@ export class ToolExecutor {
   /**
    * Show notification (placeholder - requires native module)
    */
-  private async utilityNotification(args: { title: string; message: string }): Promise<ToolResult> {
+  async utilityNotification(args) {
     return {
       success: true,
       data: {
@@ -667,7 +661,7 @@ export class ToolExecutor {
   /**
    * Open URL in default browser
    */
-  private async utilityOpenUrl(args: { url: string }): Promise<ToolResult> {
+  async utilityOpenUrl(args) {
     try {
       const platform = process.platform;
       let cmd: string;
@@ -685,7 +679,7 @@ export class ToolExecutor {
         success: true,
         data: { url: args.url, opened: true }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         error: `Failed to open URL: ${error.message}`
@@ -696,7 +690,7 @@ export class ToolExecutor {
   /**
    * Get system information
    */
-  private async utilitySystemInfo(args: any): Promise<ToolResult> {
+  async utilitySystemInfo(args) {
     const os = require('os');
     return {
       success: true,

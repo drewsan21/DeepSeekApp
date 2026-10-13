@@ -5,33 +5,11 @@
 
 const { BrowserView, BrowserWindow } = require('electron');
 
-export interface BrowserTab {
-  id: string;
-  url: string;
-  title: string;
-  favicon?: string;
-  isLoading: boolean;
-  canGoBack: boolean;
-  canGoForward: boolean;
-  view: BrowserView;
-}
-
-export interface PageContext {
-  url: string;
-  title: string;
-  selectedText: string;
-  readableText: string;
-  links: { href: string; text: string }[];
-  images: { src: string; alt: string }[];
-}
-
-export class BrowserEngine {
-  private mainWindow: BrowserWindow;
-  private tabs: Map<string, BrowserTab> = new Map();
-  private activeTabId: string | null = null;
-
-  constructor(mainWindow: BrowserWindow) {
+class BrowserEngine {
+  constructor(mainWindow) {
     this.mainWindow = mainWindow;
+    this.tabs = new Map();
+    this.activeTabId = null;
   }
 
   /**
@@ -126,7 +104,7 @@ export class BrowserEngine {
   /**
    * Emit tab update event
    */
-  private emitTabUpdate(tabId: string) {
+  emitTabUpdate(tabId) {
     const tab = this.tabs.get(tabId);
     if (tab) {
       this.mainWindow.webContents.send('browser:tab-updated', {
@@ -144,7 +122,7 @@ export class BrowserEngine {
   /**
    * Set active tab
    */
-  setActiveTab(tabId: string) {
+  setActiveTab(tabId) {
     const tab = this.tabs.get(tabId);
     if (!tab) return;
 
@@ -169,7 +147,7 @@ export class BrowserEngine {
   /**
    * Close a tab
    */
-  closeTab(tabId: string) {
+  closeTab(tabId) {
     const tab = this.tabs.get(tabId);
     if (!tab) return;
 
@@ -198,7 +176,7 @@ export class BrowserEngine {
   /**
    * Navigate to URL
    */
-  navigate(url: string) {
+  navigate(url) {
     const tab = this.getActiveTab();
     if (!tab) return;
 
@@ -243,7 +221,7 @@ export class BrowserEngine {
   /**
    * Get active tab
    */
-  getActiveTab(): BrowserTab | null {
+  getActiveTab() {
     if (!this.activeTabId) return null;
     return this.tabs.get(this.activeTabId) || null;
   }
@@ -251,14 +229,14 @@ export class BrowserEngine {
   /**
    * Get all tabs
    */
-  getAllTabs(): BrowserTab[] {
+  getAllTabs() {
     return Array.from(this.tabs.values());
   }
 
   /**
    * Extract page context from active tab
    */
-  async extractPageContext(): Promise<PageContext | null> {
+  async extractPageContext() {
     const tab = this.getActiveTab();
     if (!tab) return null;
 
@@ -313,7 +291,7 @@ export class BrowserEngine {
   /**
    * Take screenshot of active tab
    */
-  async takeScreenshot(): Promise<string | null> {
+  async takeScreenshot() {
     const tab = this.getActiveTab();
     if (!tab) return null;
 
@@ -329,7 +307,7 @@ export class BrowserEngine {
   /**
    * Execute JavaScript in active tab
    */
-  async executeJavaScript(code: string): Promise<any> {
+  async executeJavaScript(code) {
     const tab = this.getActiveTab();
     if (!tab) return null;
 
@@ -344,7 +322,7 @@ export class BrowserEngine {
   /**
    * Find text in page
    */
-  findInPage(text: string) {
+  findInPage(text) {
     const tab = this.getActiveTab();
     if (tab) {
       tab.view.webContents.findInPage(text);
@@ -364,7 +342,7 @@ export class BrowserEngine {
   /**
    * Set zoom level
    */
-  setZoomLevel(level: number) {
+  setZoomLevel(level) {
     const tab = this.getActiveTab();
     if (tab) {
       tab.view.webContents.setZoomLevel(level);
@@ -390,7 +368,7 @@ export class BrowserEngine {
   /**
    * Set bounds for all browser views
    */
-  setBounds(bounds: { x: number; y: number; width: number; height: number }) {
+  setBounds(bounds) {
     this.tabs.forEach(tab => {
       tab.view.setBounds(bounds);
     });
