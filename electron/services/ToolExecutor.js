@@ -538,7 +538,7 @@ class ToolExecutor {
    */
   async gitBranch(args) {
     try {
-      let cmd: string;
+      let cmd;
 
       switch (args.action) {
         case 'list':
@@ -664,7 +664,7 @@ class ToolExecutor {
   async utilityOpenUrl(args) {
     try {
       const platform = process.platform;
-      let cmd: string;
+      let cmd;
 
       if (platform === 'darwin') {
         cmd = `open "${args.url}"`;

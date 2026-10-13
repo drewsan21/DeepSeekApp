@@ -15,7 +15,7 @@ class BrowserEngine {
   /**
    * Create a new browser tab
    */
-  createTab(url: string = 'https://duckduckgo.com'): string {
+  createTab(url = 'https://duckduckgo.com') {
     const id = `tab-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     const view = new BrowserView({
