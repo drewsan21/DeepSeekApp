@@ -38,8 +38,9 @@ import FeatureMatrix from './components/FeatureMatrix'
 import SecurityOverview from './components/SecurityOverview'
 import OverviewPanel from './components/OverviewPanel'
 import ProjectRoadmap from './components/ProjectRoadmap'
+import PluginInstaller from './components/PluginInstaller'
 
-type View = 'overview' | 'architecture' | 'roadmap' | 'project' | 'components' | 'features' | 'security'
+type View = 'overview' | 'architecture' | 'roadmap' | 'project' | 'components' | 'features' | 'security' | 'plugins'
 
 const navItems: { id: View; label: string; icon: React.ReactNode }[] = [
   { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={18} /> },
@@ -49,6 +50,7 @@ const navItems: { id: View; label: string; icon: React.ReactNode }[] = [
   { id: 'components', label: 'Components', icon: <Package size={18} /> },
   { id: 'features', label: 'Features', icon: <CheckSquare size={18} /> },
   { id: 'security', label: 'Security', icon: <Shield size={18} /> },
+  { id: 'plugins', label: 'Plugins', icon: <Package size={18} /> },
 ]
 
 export default function App() {
@@ -164,6 +166,7 @@ export default function App() {
               {activeView === 'components' && <ComponentExplorer />}
               {activeView === 'features' && <FeatureMatrix />}
               {activeView === 'security' && <SecurityOverview />}
+              {activeView === 'plugins' && <PluginInstaller />}
             </motion.div>
           </AnimatePresence>
         </div>

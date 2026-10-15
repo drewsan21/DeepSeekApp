@@ -8,6 +8,7 @@ const { SecretStore } = require('./services/SecretStore');
 const { SettingsManager } = require('./services/SettingsManager');
 const { ConversationManager } = require('./services/ConversationManager');
 const { WorkspaceManager } = require('./services/WorkspaceManager');
+const { PluginManager } = require('./services/PluginManager');
 
 let mainWindow;
 let browserEngine;
@@ -17,6 +18,7 @@ let secretStore;
 let settingsManager;
 let conversationManager;
 let workspaceManager;
+let pluginManager;
 
 function createWindow() {
   // Create the browser window.
@@ -37,6 +39,7 @@ function createWindow() {
   settingsManager = new SettingsManager();
   conversationManager = new ConversationManager(databaseManager);
   workspaceManager = new WorkspaceManager(databaseManager);
+  pluginManager = new PluginManager(userDataPath);
 
   // Initialize real services
   browserEngine = new BrowserEngine(mainWindow);
@@ -50,7 +53,8 @@ function createWindow() {
     secretStore,
     settingsManager,
     conversationManager,
-    workspaceManager
+    workspaceManager,
+    pluginManager
   });
 
   // Load the app
