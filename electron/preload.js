@@ -165,4 +165,17 @@ contextBridge.exposeInMainWorld('deepseek', {
     getStats: () => ipcRenderer.invoke('database:getStats'),
     vacuum: () => ipcRenderer.invoke('database:vacuum'),
   },
+
+  // Plugins
+  plugins: {
+    getAvailable: () => ipcRenderer.invoke('plugins:getAvailable'),
+    getInstalled: () => ipcRenderer.invoke('plugins:getInstalled'),
+    install: (pluginId) => ipcRenderer.invoke('plugins:install', pluginId),
+    uninstall: (pluginId) => ipcRenderer.invoke('plugins:uninstall', pluginId),
+    update: (pluginId) => ipcRenderer.invoke('plugins:update', pluginId),
+    isInstalled: (pluginId) => ipcRenderer.invoke('plugins:isInstalled', pluginId),
+    getInfo: (pluginId) => ipcRenderer.invoke('plugins:getInfo', pluginId),
+    executeCommand: (pluginId, command, args) => 
+      ipcRenderer.invoke('plugins:executeCommand', pluginId, command, args),
+  },
 });

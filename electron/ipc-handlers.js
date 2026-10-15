@@ -586,6 +586,42 @@ function registerIpcHandlers(mainWindow, managers) {
     databaseManager.vacuum();
     return true;
   });
+
+  // ============================================================================
+  // Plugin handlers
+  // ============================================================================
+
+  ipcMain.handle('plugins:getAvailable', async () => {
+    return pluginManager.getAvailablePlugins();
+  });
+
+  ipcMain.handle('plugins:getInstalled', async () => {
+    return pluginManager.getInstalledPlugins();
+  });
+
+  ipcMain.handle('plugins:install', async (event, pluginId) => {
+    return await pluginManager.installPlugin(pluginId);
+  });
+
+  ipcMain.handle('plugins:uninstall', async (event, pluginId) => {
+    return await pluginManager.uninstallPlugin(pluginId);
+  });
+
+  ipcMain.handle('plugins:update', async (event, pluginId) => {
+    return await pluginManager.updatePlugin(pluginId);
+  });
+
+  ipcMain.handle('plugins:isInstalled', async (event, pluginId) => {
+    return pluginManager.isPluginInstalled(pluginId);
+  });
+
+  ipcMain.handle('plugins:getInfo', async (event, pluginId) => {
+    return pluginManager.getPluginInfo(pluginId);
+  });
+
+  ipcMain.handle('plugins:executeCommand', async (event, pluginId, command, args) => {
+    return await pluginManager.executePluginCommand(pluginId, command, args);
+  });
 }
 
 module.exports = { registerIpcHandlers };
