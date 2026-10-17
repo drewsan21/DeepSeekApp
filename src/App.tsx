@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Suspense, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard,
@@ -7,41 +7,27 @@ import {
   Package,
   Shield,
   CheckSquare,
-  FileText,
   Menu,
   X,
   Terminal,
-  Globe,
-  Key,
-  Cpu,
-  Database,
-  Lock,
-  Eye,
-  Zap,
-  GitBranch,
-  Server,
-  Monitor,
-  Users,
-  Settings,
-  FolderOpen,
-  ArrowRight,
-  ChevronRight,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Circle
+  ChevronRight
 } from 'lucide-react'
-import ArchitectureView from './components/ArchitectureView'
-import PhaseRoadmap from './components/PhaseRoadmap'
-import ComponentExplorer from './components/ComponentExplorer'
-import FeatureMatrix from './components/FeatureMatrix'
-import SecurityOverview from './components/SecurityOverview'
-import OverviewPanel from './components/OverviewPanel'
-import ProjectRoadmap from './components/ProjectRoadmap'
-import PluginInstaller from './components/PluginInstaller'
 
 type View = 'overview' | 'architecture' | 'roadmap' | 'project' | 'components' | 'features' | 'security' | 'plugins'
 
+// Code-split the views: only the panel that is actually opened gets loaded,
+// which shrinks the initial bundle and speeds up first paint.
+const ArchitectureView = React.lazy(() => import('./components/ArchitectureView'))
+const PhaseRoadmap = React.lazy(() => import('./components/PhaseRoadmap'))
+const ComponentExplorer = React.lazy(() => import('./components/ComponentExplorer'))
+const FeatureMatrix = React.lazy(() => import('./components/FeatureMatrix'))
+const SecurityOverview = React.lazy(() => import('./components/SecurityOverview'))
+const OverviewPanel = React.lazy(() => import('./components/OverviewPanel'))
+const ProjectRoadmap = React.lazy(() => import('./components/ProjectRoadmap'))
+const PluginInstaller = React.lazy(() => import('./components/PluginInstaller'))
+
+// Hoisted to module scope so the array (and its icon elements) is created
+// once instead of on every render.
 const navItems: { id: View; label: string; icon: React.ReactNode }[] = [
   { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={18} /> },
   { id: 'architecture', label: 'Architecture', icon: <Layers size={18} /> },
@@ -53,9 +39,31 @@ const navItems: { id: View; label: string; icon: React.ReactNode }[] = [
   { id: 'plugins', label: 'Plugins', icon: <Package size={18} /> },
 ]
 
+const viewComponents: Record<View, React.LazyExoticComponent<React.ComponentType>> = {
+  overview: OverviewPanel,
+  architecture: ArchitectureView,
+  project: ProjectRoadmap,
+  roadmap: PhaseRoadmap,
+  components: ComponentExplorer,
+  features: FeatureMatrix,
+  security: SecurityOverview,
+  plugins: PluginInstaller,
+}
+
+function ViewLoader() {
+  return (
+    <div className="flex items-center justify-center py-20 text-gray-500 text-sm">
+      <Terminal size={16} className="animate-pulse mr-2" />
+      Loading…
+    </div>
+  )
+}
+
 export default function App() {
   const [activeView, setActiveView] = useState<View>('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const ActiveView = viewComponents[activeView]
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex">
@@ -159,14 +167,9 @@ export default function App() {
               transition={{ duration: 0.2 }}
               className="p-4 lg:p-6 max-w-7xl mx-auto"
             >
-              {activeView === 'overview' && <OverviewPanel />}
-              {activeView === 'architecture' && <ArchitectureView />}
-              {activeView === 'project' && <ProjectRoadmap />}
-              {activeView === 'roadmap' && <PhaseRoadmap />}
-              {activeView === 'components' && <ComponentExplorer />}
-              {activeView === 'features' && <FeatureMatrix />}
-              {activeView === 'security' && <SecurityOverview />}
-              {activeView === 'plugins' && <PluginInstaller />}
+              <Suspense fallback={<ViewLoader />}>
+                <ActiveView />
+              </Suspense>
             </motion.div>
           </AnimatePresence>
         </div>
