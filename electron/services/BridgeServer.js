@@ -15,6 +15,24 @@
  *   GET  /v1/bridge/tools           – list exposed tools/skills/plugins/MCP servers
  *   GET  /health                    – bridge status
  *
+ * Account-token setup:
+ *   - The bridge is configured directly from your DeepSeek account token: on
+ *     login the session's API key / OAuth access token is handed to the bridge
+ *     (BridgeServer.setAccountToken) and every upstream request uses it, so
+ *     connecting apps transparently act as you — no separate keys needed.
+ *   - The same account token also authenticates the bridge itself: external
+ *     apps may present EITHER the generated bridge bearer token OR your
+ *     account token in "Authorization: Bearer <token>".
+ *
+ * Full chat/bridge access for other AI apps:
+ *   - All registered ToolExecutor actions are auto-discovered and advertised
+ *     as function tools (not just a static subset), plus installed plugins and
+ *     skills are exposed as callable bridge tools ("plugin__<id>",
+ *     "skill__<name>") so any connected app can apply them.
+ *   - Persistent conversations: send "X-Bridge-Conversation: <id>" (or set
+ *     body.conversation) and history is stored via ConversationManager exactly
+ *     like in-app chats; omit the header for stateless calls.
+ *
  * Security:
  *   - Binds to 127.0.0.1 only (never reachable from the network).
  *   - Requires a bearer token (generated at login, shown in the app UI).
@@ -33,7 +51,8 @@ class BridgeServer {
    * @param {object} deps.pluginManager     - PluginManager service
    * @param {object} deps.conversationManager - ConversationManager service
    * @param {object} deps.settings          - SettingsManager service
-   * @param {object} deps.secretStore       - SecretStore service (holds DeepSeek API key)
+   * @param {object} deps.secretStore       - SecretStore service (holds DeepSeek account token)
+   * @param {object} deps.databaseManager   - DatabaseManager service (MCP servers / skills registry)
    */
   constructor(deps = {}) {
     this.toolExecutor = deps.toolExecutor;
@@ -41,11 +60,17 @@ class BridgeServer {
     this.conversationManager = deps.conversationManager;
     this.settings = deps.settings;
     this.secretStore = deps.secretStore;
+    this.databaseManager = deps.databaseManager;
 
     this.server = null;
     this.port = 0;
     this.token = null;
     this.running = false;
+    // Your DeepSeek account token (API key or OAuth access token), injected by
+    // the auth layer on login. Used BOTH for upstream requests and as an
+    // accepted bridge credential so apps can authenticate with the account
+    // token itself.
+    this.accountToken = null;
 
     // In-memory conversation store for bridge sessions (keyed by X-Bridge-Conversation id)
     this.sessions = new Map();
@@ -136,6 +161,35 @@ class BridgeServer {
   }
 
   /* ------------------------------------------------------------------ */
+  /* Account token                                                      */
+  /* ------------------------------------------------------------------ */
+
+  /**
+   * Configure the bridge with your DeepSeek account token (API key or OAuth
+   * access token). Called by the auth layer on login so the bridge is set up
+   * directly from the account session:
+   *   - all upstream chat requests are made with this token;
+   *   - connecting apps may authenticate to the bridge with this same token
+   *     (in addition to the generated bridge bearer token).
+   * Pass null on logout to tear the setup down.
+   */
+  setAccountToken(token) {
+    this.accountToken = typeof token === 'string' && token.trim() ? token.trim() : null;
+    if (this.running) {
+      console.log(
+        `[Bridge] account token ${this.accountToken ? 'configured' : 'cleared'} (${this.token ? 'bridge token still active' : 'no bridge token'})`
+      );
+    }
+    return this.accountToken;
+  }
+
+  /** Optional account identity used when naming persisted bridge chats. */
+  setAccountInfo(info = {}) {
+    this.accountEmail = info.email || null;
+    this.accountId = info.id || null;
+  }
+
+  /* ------------------------------------------------------------------ */
   /* Lifecycle                                                          */
   /* ------------------------------------------------------------------ */
 
@@ -149,6 +203,13 @@ class BridgeServer {
     const settings = await this._getSettings();
     const port = options.port || settings.bridgePort || 17333;
     this.token = options.token || settings.bridgeToken || crypto.randomBytes(24).toString('hex');
+
+    // Correct setup from the account token: pick up the logged-in session's
+    // DeepSeek token (API key or OAuth access token) so the bridge works
+    // immediately after login without extra configuration.
+    if (!this.accountToken) {
+      this.accountToken = (await this._getDeepSeekApiKey()) || null;
+    }
 
     this.server = http.createServer((req, res) => {
       this._handle(req, res).catch((err) => {
@@ -192,6 +253,10 @@ class BridgeServer {
       port: this.port,
       token: this.token,
       model: BRIDGE_MODEL,
+      // The bridge is configured from your account token: it authenticates
+      // upstream calls AND can be used by connecting apps as a bearer token.
+      accountTokenConfigured: Boolean(this.accountToken),
+      authSchemes: ['bridge bearer token', 'deepseek account token'],
       endpoints: [
         'GET  /v1/models',
         'POST /v1/chat/completions',
@@ -238,6 +303,8 @@ class BridgeServer {
         return this._handleToolsList(res);
       case pathname === '/v1/bridge/tool-exec' && req.method === 'POST':
         return this._handleToolExec(body, res);
+      case pathname.startsWith('/v1/bridge/conversations'):
+        return this._handleConversations(pathname, req, res);
       default:
         return this._send(res, 404, { error: { message: `No bridge route for ${req.method} ${pathname}` } });
     }
@@ -293,6 +360,99 @@ class BridgeServer {
   }
 
   /* ------------------------------------------------------------------ */
+  /* Bridge conversations (full chat access for external apps)          */
+  /* ------------------------------------------------------------------ */
+
+  /**
+   * GET    /v1/bridge/conversations          – list bridge-owned chats
+   * GET    /v1/bridge/conversations/:id      – fetch stored messages
+   * DELETE /v1/bridge/conversations/:id      – delete a bridge chat
+   */
+  async _handleConversations(pathname, req, res) {
+    const idMatch = pathname.match(/^\/v1\/bridge\/conversations\/(.+)$/);
+    if (!this.conversationManager) {
+      return this._send(res, 503, { error: { message: 'conversation manager unavailable' } });
+    }
+
+    if (!idMatch) {
+      if (req.method !== 'GET') return this._send(res, 405, { error: { message: 'method not allowed' } });
+      try {
+        const all = this.conversationManager.getAllConversations() || [];
+        const bridgeConvs = all.filter((c) => c && c.metadata && c.metadata.bridge === true);
+        return this._send(res, 200, { object: 'list', data: bridgeConvs });
+      } catch (err) {
+        return this._send(res, 500, { error: { message: String(err.message || err) } });
+      }
+    }
+
+    const id = decodeURIComponent(idMatch[1]);
+    if (req.method === 'GET') {
+      try {
+        const conversation = this.conversationManager.getConversation(id);
+        if (!conversation) return this._send(res, 404, { error: { message: 'conversation not found' } });
+        const messages = this.conversationManager.getMessages(id);
+        return this._send(res, 200, { object: 'list', data: messages });
+      } catch (err) {
+        return this._send(res, 500, { error: { message: String(err.message || err) } });
+      }
+    }
+    if (req.method === 'DELETE') {
+      try {
+        this.conversationManager.deleteConversation(id);
+        this.sessions.delete(id);
+        return this._send(res, 200, { deleted: id });
+      } catch (err) {
+        return this._send(res, 500, { error: { message: String(err.message || err) } });
+      }
+    }
+    return this._send(res, 405, { error: { message: 'method not allowed' } });
+  }
+
+  /**
+   * Persist a bridge chat turn into the app's own conversation store so other
+   * AI apps get full use of the chat: history survives restarts and appears
+   * alongside in-app conversations. Falls back to an in-memory session when
+   * ConversationManager is unavailable.
+   */
+  async _persistTurn(convId, userContent, assistantMessage) {
+    if (!this.conversationManager) {
+      const mem = this.sessions.get(convId) || [];
+      mem.push({ role: 'user', content: userContent });
+      mem.push(assistantMessage);
+      if (mem.length > this.maxSessionMessages) mem.splice(0, mem.length - this.maxSessionMessages);
+      this.sessions.set(convId, mem);
+      return;
+    }
+    try {
+      let exists = false;
+      try {
+        exists = Boolean(this.conversationManager.getConversation(convId));
+      } catch {
+        exists = false;
+      }
+      if (!exists) {
+        this.conversationManager.createConversation(
+          `Bridge · ${new Date().toISOString().slice(0, 16)} (${this.accountEmail || 'local app'})`,
+          'deepseek-bridge',
+          'deepseek-chat',
+          { bridge: true }
+        );
+      }
+      if (userContent != null) this.conversationManager.addMessage(convId, 'user', String(userContent), { bridge: true });
+      const content =
+        typeof assistantMessage.content === 'string'
+          ? assistantMessage.content
+          : JSON.stringify(assistantMessage.content || '');
+      this.conversationManager.addMessage(convId, 'assistant', content, {
+        bridge: true,
+        tool_calls: assistantMessage.tool_calls || undefined,
+      });
+    } catch (err) {
+      console.error('[Bridge] failed to persist conversation turn:', err);
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
   /* Chat completions (OpenAI-compatible, with tool round-trips)        */
   /* ------------------------------------------------------------------ */
 
@@ -309,12 +469,28 @@ class BridgeServer {
     const wantsStream = body.stream === true;
     const maxRounds = Math.min(body.bridge_max_tool_rounds ?? 4, 10);
 
+    let messages = [...body.messages];
+
+    // Persistent chat: if the caller supplies a conversation id (header or
+    // body), prepend stored history so external apps get full use of the chat.
+    const convId = this._conversationId(req, body);
+    if (convId) {
+      const history = await this._loadHistory(convId);
+      if (history.length > 0) {
+        messages = [...history, ...messages];
+      }
+    }
+
     // Advertise only tools that actually exist in the local registry so the
     // model never hallucinates calls to unavailable actions.
     const availableExecutors = await this._getAvailableExecutorNames();
 
-    // Build tool definitions: caller-provided + our locally exposed ones.
-    const toolDefs = [
+    // Build tool definitions: caller-provided + our locally exposed ones +
+    // every ToolExecutor action + installed plugins/skills ("full use").
+    const dynamicTools = await this._discoverAllTools(availableExecutors);
+    const seenNames = new Set();
+    const toolDefs = [];
+    for (const def of [
       ...(Array.isArray(body.tools) ? body.tools : []),
       ...this.exposedTools
         .filter((t) => availableExecutors === null || availableExecutors.has(t.executor))
@@ -322,9 +498,14 @@ class BridgeServer {
           type: 'function',
           function: { name: t.name, description: t.description, parameters: t.parameters },
         })),
-    ];
+      ...dynamicTools,
+    ]) {
+      const name = def?.function?.name;
+      if (!name || seenNames.has(name)) continue;
+      seenNames.add(name);
+      toolDefs.push(def);
+    }
 
-    let messages = [...body.messages];
     const completionId = `chatcmpl-bridge-${crypto.randomUUID()}`;
     const created = Math.floor(Date.now() / 1000);
     const model = body.model && body.model !== BRIDGE_MODEL ? body.model : 'deepseek-chat';
@@ -537,15 +718,21 @@ class BridgeServer {
   /* ------------------------------------------------------------------ */
 
   async _authenticate(req) {
-    if (!this.token) return false;
+    if (!this.token && !this.accountToken) return false;
     const header = req.headers['authorization'] || '';
     const bearer = header.startsWith('Bearer ') ? header.slice(7) : '';
-    const timingSafeEqual = (a, b) => {
-      const ba = Buffer.from(a);
-      const bb = Buffer.from(b);
-      return ba.length === bb.length && crypto.timingSafeEqual(ba, bb);
-    };
-    return bearer === this.token || timingSafeEqual(bearer, this.token);
+    if (!bearer) return false;
+    // Accept EITHER the generated bridge token OR the DeepSeek account token,
+    // so any app already holding your account credentials gets full use of the
+    // chat/bridge without extra setup.
+    return this._tokenMatches(bearer, this.token) || this._tokenMatches(bearer, this.accountToken);
+  }
+
+  _tokenMatches(candidate, expected) {
+    if (!expected) return false;
+    const a = Buffer.from(candidate);
+    const b = Buffer.from(expected);
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
   }
 
   _applyCors(req, res) {
@@ -586,12 +773,17 @@ class BridgeServer {
   }
 
   async _getDeepSeekApiKey() {
+    // Prefer the live account token injected at login (OAuth access token or
+    // API key from the account session).
+    if (this.accountToken) return this.accountToken;
     try {
       if (this.secretStore) {
         const key =
           (typeof this.secretStore.getSecret === 'function' && (await this.secretStore.getSecret('deepseek_api_key'))) ||
           (typeof this.secretStore.get === 'function' && (await this.secretStore.get('deepseek_api_key'))) ||
-          (typeof this.secretStore.getApiKey === 'function' && (await this.secretStore.getApiKey('deepseek')));
+          (typeof this.secretStore.getApiKey === 'function' && (await this.secretStore.getApiKey('deepseek'))) ||
+          (typeof this.secretStore.getApiKey === 'function' && (await this.secretStore.getApiKey('deepseek-api'))) ||
+          (typeof this.secretStore.getOAuthToken === 'function' && (await this.secretStore.getOAuthToken('deepseek')));
         if (key) return key;
       }
       if (this.settings && typeof this.settings.get === 'function') {
