@@ -37,6 +37,17 @@ function registerIpcHandlers(mainWindow, managers) {
     // In production, this would open an OAuth window
     // For now, simulate successful login
     authState = { authenticated: true, account: { email: 'user@example.com' } };
+
+    // Auto-start the local bridge endpoint after login so other apps on this
+    // machine can use the chat (tools/skills/plugins/MCPs) via localhost.
+    if (managers.bridgeServer) {
+      try {
+        const info = await managers.bridgeServer.start();
+        sendToRenderer('bridge:status', info);
+      } catch (err) {
+        console.error('[Bridge] failed to start after login:', err);
+      }
+    }
     return true;
   });
 
@@ -44,6 +55,37 @@ function registerIpcHandlers(mainWindow, managers) {
     authState = { authenticated: false, account: null };
     deepseekClient = null;
     qwenClient = null;
+    // Bridge is only exposed while logged in — tear it down on logout.
+    if (managers.bridgeServer) {
+      await managers.bridgeServer.stop().catch(() => {});
+      sendToRenderer('bridge:status', { running: false });
+    }
+    return true;
+  });
+
+  // ============================================================================
+  // Bridge handlers (local endpoint for other apps)
+  // ============================================================================
+
+  ipcMain.handle('bridge:info', async () => {
+    if (!managers.bridgeServer) return { running: false };
+    return managers.bridgeServer.getInfo();
+  });
+
+  ipcMain.handle('bridge:start', async (_event, options) => {
+    if (!managers.bridgeServer || !authState.authenticated) {
+      throw new Error('Login required before exposing the local bridge endpoint');
+    }
+    const info = await managers.bridgeServer.start(options || {});
+    sendToRenderer('bridge:status', info);
+    return info;
+  });
+
+  ipcMain.handle('bridge:stop', async () => {
+    if (managers.bridgeServer) {
+      await managers.bridgeServer.stop();
+      sendToRenderer('bridge:status', { running: false });
+    }
     return true;
   });
 
@@ -123,7 +165,7 @@ function registerIpcHandlers(mainWindow, managers) {
         return { started: false };
       }
 
-      sendToRenderer('harness:event', { type: 'thinking',  'Connecting to API...' });
+      sendToRenderer('harness:event', { type: 'thinking', message: 'Connecting to API...' });
 
       // Prepare messages
       const messages = [];
@@ -136,7 +178,7 @@ function registerIpcHandlers(mainWindow, managers) {
       messages.push({ role: 'user', content: prompt });
 
       // Stream response
-      sendToRenderer('harness:event', { type: 'thinking',  'Processing request...' });
+      sendToRenderer('harness:event', { type: 'thinking', message: 'Processing request...' });
 
       const stream = client.chatStream(messages, {
         temperature: 0.7,
