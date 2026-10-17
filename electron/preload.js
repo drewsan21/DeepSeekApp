@@ -74,6 +74,18 @@ contextBridge.exposeInMainWorld('deepseek', {
     execute: (toolName, args) => ipcRenderer.invoke('tool:execute', toolName, args),
     list: () => ipcRenderer.invoke('tool:list'),
   },
+
+  // Local bridge endpoint (for other apps on this machine)
+  bridge: {
+    info: () => ipcRenderer.invoke('bridge:info'),
+    start: (options) => ipcRenderer.invoke('bridge:start', options),
+    stop: () => ipcRenderer.invoke('bridge:stop'),
+    onStatus: (callback) => {
+      const listener = (event, data) => callback(data);
+      ipcRenderer.on('bridge:status', listener);
+      return () => ipcRenderer.removeListener('bridge:status', listener);
+    },
+  },
   
   // Approvals
   approvals: {

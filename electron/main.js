@@ -9,8 +9,10 @@ const { SettingsManager } = require('./services/SettingsManager');
 const { ConversationManager } = require('./services/ConversationManager');
 const { WorkspaceManager } = require('./services/WorkspaceManager');
 const { PluginManager } = require('./services/PluginManager');
+const { BridgeServer } = require('./services/BridgeServer');
 
 let mainWindow;
+let bridgeServer;
 let browserEngine;
 let toolExecutor;
 let databaseManager;
@@ -45,6 +47,15 @@ function createWindow() {
   browserEngine = new BrowserEngine(mainWindow);
   toolExecutor = new ToolExecutor();
 
+  // Local bridge endpoint: exposed to other apps on this machine after login
+  bridgeServer = new BridgeServer({
+    toolExecutor,
+    pluginManager,
+    conversationManager,
+    settings: settingsManager,
+    secretStore,
+  });
+
   // Register IPC handlers with all managers
   registerIpcHandlers(mainWindow, {
     browserEngine,
@@ -54,7 +65,8 @@ function createWindow() {
     settingsManager,
     conversationManager,
     workspaceManager,
-    pluginManager
+    pluginManager,
+    bridgeServer
   });
 
   // Load the app
@@ -85,6 +97,13 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
+  }
+});
+
+// Ensure the local bridge endpoint is shut down when the app exits.
+app.on('before-quit', () => {
+  if (bridgeServer && bridgeServer.running) {
+    bridgeServer.stop().catch(() => {});
   }
 });
 
