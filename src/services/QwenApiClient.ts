@@ -84,59 +84,64 @@ export class QwenApiClient {
   }
 
   /**
+   * Perform a request and parse the JSON response, centralising the
+   * error-handling logic that was previously duplicated in every method.
+   */
+  private async request<T>(path: string, init: RequestInit): Promise<T> {
+    try {
+      const response = await fetch(`${this.baseUrl}${path}`, init);
+
+      if (!response.ok) {
+        // Try to surface the API's own error message when present.
+        let errorMessage: string | null = null;
+        try {
+          const errorBody = await response.json();
+          errorMessage = errorBody?.error?.message ?? null;
+        } catch {
+          // Non-JSON error body — fall back to the status text below.
+        }
+        throw new Error(errorMessage || `Request to ${path} failed: ${response.statusText}`);
+      }
+
+      return (await response.json()) as T;
+    } catch (error) {
+      console.error(`Error during ${init.method ?? 'GET'} ${path}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * List available models
    */
   async listModels(): Promise<QwenModel[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/models`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to list models: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data.data || [];
-    } catch (error) {
-      console.error('Error listing models:', error);
-      throw error;
-    }
+    const data = await this.request<{ data?: QwenModel[] }>('/models', {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+    return data.data || [];
   }
 
   /**
    * Send chat completion request
    */
   async chat(request: QwenChatRequest): Promise<QwenChatResponse> {
-    try {
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({
-          ...request,
-          stream: false,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || `Chat request failed: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error in chat request:', error);
-      throw error;
-    }
+    return this.request<QwenChatResponse>('/chat/completions', {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        ...request,
+        stream: false,
+      }),
+    });
   }
 
   /**
    * Send streaming chat completion request
    */
   async *chatStream(request: QwenChatRequest): AsyncGenerator<QwenStreamChunk> {
+    let response: Response;
     try {
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({
@@ -149,18 +154,26 @@ export class QwenApiClient {
         const error = await response.json();
         throw new Error(error.error?.message || `Stream request failed: ${response.statusText}`);
       }
+    } catch (error) {
+      console.error('Error in stream request:', error);
+      throw error;
+    }
 
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body');
-      }
+    // Release the underlying connection as soon as the generator finishes,
+    // is closed early, or throws — otherwise the reader keeps the HTTP
+    // stream alive and leaks resources.
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('No response body');
+    }
 
+    try {
       const decoder = new TextDecoder();
       let buffer = '';
 
       while (true) {
         const { done, value } = await reader.read();
-        
+
         if (done) {
           break;
         }
@@ -172,7 +185,7 @@ export class QwenApiClient {
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6);
-            
+
             if (data === '[DONE]') {
               return;
             }
@@ -186,9 +199,10 @@ export class QwenApiClient {
           }
         }
       }
-    } catch (error) {
-      console.error('Error in stream request:', error);
-      throw error;
+    } finally {
+      reader.cancel().catch(() => {
+        // Stream may already be exhausted; cancelling a closed reader is a no-op.
+      });
     }
   }
 
@@ -196,42 +210,20 @@ export class QwenApiClient {
    * Get user information
    */
   async getUserInfo(): Promise<any> {
-    try {
-      const response = await fetch(`${this.baseUrl}/user`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to get user info: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error getting user info:', error);
-      throw error;
-    }
+    return this.request('/user', {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
   }
 
   /**
    * Get usage statistics
    */
   async getUsage(): Promise<any> {
-    try {
-      const response = await fetch(`${this.baseUrl}/usage`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to get usage: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error getting usage:', error);
-      throw error;
-    }
+    return this.request('/usage', {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
   }
 }
 

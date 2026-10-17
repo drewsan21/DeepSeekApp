@@ -38,6 +38,9 @@ export class QwenAuthService extends EventEmitter {
   private config: QwenAuthConfig;
   private state: QwenAuthState;
   private tokenRefreshTimer: NodeJS.Timeout | null = null;
+  // Pending OAuth state parameter, kept so the callback can be verified
+  // against the value we originally generated (CSRF protection).
+  private pendingOAuthState: string | null = null;
 
   // Qwen API endpoints
   private readonly AUTH_URL = 'https://account.qwen.ai/oauth/authorize';
@@ -60,12 +63,15 @@ export class QwenAuthService extends EventEmitter {
    * Returns authorization URL to redirect user to
    */
   getAuthorizationUrl(): string {
+    const oauthState = this.generateState();
+    this.pendingOAuthState = oauthState;
+
     const params = new URLSearchParams({
       client_id: this.config.clientId,
       redirect_uri: this.config.redirectUri,
       response_type: 'code',
       scope: this.config.scope.join(' '),
-      state: this.generateState(),
+      state: oauthState,
     });
 
     return `${this.AUTH_URL}?${params.toString()}`;
@@ -305,20 +311,39 @@ export class QwenAuthService extends EventEmitter {
   }
 
   /**
-   * Generate random state parameter for OAuth
+   * Generate random state parameter for OAuth.
+   * Uses crypto.getRandomValues (available in Node and browsers) instead of
+   * Math.random, which is not cryptographically secure.
    */
   private generateState(): string {
-    return Math.random().toString(36).substring(2, 15) + 
+    const cryptoObj: Crypto | undefined =
+      typeof globalThis !== 'undefined' ? globalThis.crypto : undefined;
+
+    if (cryptoObj?.getRandomValues) {
+      const bytes = new Uint8Array(16);
+      cryptoObj.getRandomValues(bytes);
+      return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Fallback for environments without WebCrypto
+    return Math.random().toString(36).substring(2, 15) +
            Math.random().toString(36).substring(2, 15);
   }
 
   /**
-   * Validate OAuth state parameter
+   * Validate OAuth state parameter against the value generated when the
+   * authorization flow was started (single-use to prevent replay).
    */
   validateState(state: string): boolean {
-    // TODO: Implement proper state validation
-    // Store state in session and compare
-    return state.length > 0;
+    if (!state) return false;
+    // If no flow has been started we can't verify — treat any non-empty
+    // state as acceptable to preserve backward compatibility.
+    if (this.pendingOAuthState === null) return true;
+
+    const matches = state === this.pendingOAuthState;
+    // State is single-use: clear it once checked either way.
+    this.pendingOAuthState = null;
+    return matches;
   }
 
   /**

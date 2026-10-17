@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   CheckSquare,
@@ -104,7 +104,12 @@ const riskColors = {
 export default function FeatureMatrix() {
   const [filter, setFilter] = useState('All')
 
-  const filtered = filter === 'All' ? features : features.filter(f => f.category === filter)
+  // Only recompute the filtered list when the filter actually changes,
+  // not on every render of this component.
+  const filtered = useMemo(
+    () => (filter === 'All' ? features : features.filter(f => f.category === filter)),
+    [filter]
+  )
 
   return (
     <div className="space-y-8">
@@ -180,7 +185,10 @@ export default function FeatureMatrix() {
         </h2>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
           <div className="space-y-2">
-            {shortcuts.map((shortcut, i) => (
+            {shortcuts.map((shortcut, i) => {
+              // Split once per shortcut instead of twice per key inside the map.
+              const keys = shortcut.keys.split('+')
+              return (
               <motion.div
                 key={shortcut.keys}
                 initial={{ opacity: 0, x: -10 }}
@@ -190,17 +198,18 @@ export default function FeatureMatrix() {
               >
                 <span className="text-xs text-gray-400">{shortcut.action}</span>
                 <div className="flex items-center gap-1">
-                  {shortcut.keys.split('+').map((key, j) => (
+                  {keys.map((key, j) => (
                     <span key={j} className="flex items-center gap-1">
                       <kbd className="px-2 py-0.5 rounded bg-gray-800 border border-gray-700 text-[11px] text-gray-300 font-mono">
                         {key}
                       </kbd>
-                      {j < shortcut.keys.split('+').length - 1 && <span className="text-gray-600 text-[10px]">+</span>}
+                      {j < keys.length - 1 && <span className="text-gray-600 text-[10px]">+</span>}
                     </span>
                   ))}
                 </div>
               </motion.div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>
